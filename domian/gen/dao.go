@@ -7,8 +7,6 @@ import (
 	"strings"
 
 	"github.com/xbitgo/core/tools/tool_file"
-	"github.com/xbitgo/core/tools/tool_str"
-
 	"go2gen/domian/gen/tpls"
 	"go2gen/domian/parser"
 )
@@ -18,13 +16,32 @@ func (m *Manager) Dao() error {
 	if err != nil {
 		log.Fatalf("do2Sql: parse dir[%s], err: %v", m.Tmpl.DoDir, err)
 	}
+	buf := []byte{}
 	for _, xst := range ipr.StructList {
-		m.genDao(xst)
+		b, err := m.genDao(xst)
+		if err != nil {
+			log.Panicf("gen dao err: %v", err)
+		}
+		buf = append(buf, b...)
 	}
+
+	filename := fmt.Sprintf("%s/dao_gen.go", m.Tmpl.DaoDir)
+	bufH := m.GenFileHeader("dao", []string{
+		"github.com/pkg/errors",
+		"gorm.io/gorm",
+		fmt.Sprintf("%s/%s/internal/domain/repo/dbal/do", conf.Global.ProjectName, m.AppName),
+	})
+	buf = append(bufH, buf...)
+	buf = m.format(buf, filename)
+	err = tool_file.WriteFile(filename, buf)
+	if err != nil {
+		log.Printf("dao gen [%s] write file err: %v \n", filename, err)
+	}
+
 	return nil
 }
 
-func (m *Manager) genDao(xst parser.XST) {
+func (m *Manager) genDao(xst parser.XST) ([]byte, error) {
 	var (
 		pkName = ""
 		pkType = ""
@@ -39,7 +56,6 @@ func (m *Manager) genDao(xst parser.XST) {
 		}
 	}
 	dao := tpls.Dao{
-		EntityPackage:  fmt.Sprintf("%s/%s/internal/domain/repo/dbal/do", conf.Global.ProjectName, m.AppName),
 		EntityName:     xst.Name,
 		DaoName:        strings.TrimSuffix(xst.Name, "Do") + "Dao",
 		EntityListName: fmt.Sprintf("%sList", xst.Name),
@@ -49,15 +65,15 @@ func (m *Manager) genDao(xst parser.XST) {
 		PkCol:          pkCol,
 	}
 
-	filename := fmt.Sprintf("%s/%s_dao_gen.go", m.Tmpl.DaoDir, tool_str.ToSnakeCase(strings.TrimSuffix(xst.Name, "Do")))
+	//filename := fmt.Sprintf("%s/%s_dao_gen.go", m.Tmpl.DaoDir, tool_str.ToSnakeCase(strings.TrimSuffix(xst.Name, "Do")))
 	buf, err := dao.Execute()
 	if err != nil {
-		fmt.Println(err)
-		return
+		return buf, err
 	}
-	buf = m.format(buf, filename)
-	err = tool_file.WriteFile(filename, buf)
-	if err != nil {
-		log.Printf("do gen [%s] write file err: %v \n", filename, err)
-	}
+	return buf, nil
+	//buf = m.format(buf, filename)
+	//err = tool_file.WriteFile(filename, buf)
+	//if err != nil {
+	//	log.Printf("do gen [%s] write file err: %v \n", filename, err)
+	//}
 }

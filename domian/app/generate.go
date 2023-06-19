@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"go2gen/domian/gen"
 	"go2gen/domian/parser"
 	"log"
@@ -18,7 +17,6 @@ func (a *App) Generate() error {
 		dirs    = a.parseDirs()
 		pkgList = map[string]*Pkg{}
 	)
-	fmt.Println(dirs)
 	for _, dir := range dirs {
 		pkg := &Pkg{
 			Dir: dir,
@@ -26,7 +24,6 @@ func (a *App) Generate() error {
 		if dir == a.Tmpl.EntityDir {
 			pkg.IsEntity = true
 		}
-		fmt.Println(dir)
 		pr, err := parser.Scan(dir, parser.ParseTypeWatch)
 		if err != nil {
 			log.Printf("generate parser pkg[%s] err: %v \n", dir, err)
@@ -39,13 +36,17 @@ func (a *App) Generate() error {
 	gm := gen.NewManager(a.Tmpl, a.Name, a.Pwd)
 	entityPkg := pkgList[a.Tmpl.EntityDir]
 	// entity 生成
-	for _, xst := range entityPkg.Parser.StructList {
-		err := gm.Do(xst)
-		if err != nil {
-			log.Printf("gen do err: %v \n", err)
-			return err
-		}
-	}
+	//for _, xst := range entityPkg.Parser.StructList {
+	//	err := gm.Do(xst)
+	//	if err != nil {
+	//		log.Printf("gen do err: %v \n", err)
+	//		return err
+	//	}
+	//}
+	gm.DoList(entityPkg.Parser.StructList)
+
+	gm.IOApi(entityPkg.Parser.StructList)
+
 	gm.EntityTypeDef()
 	// do 的TypeDef
 	gm.DoTypeDef()

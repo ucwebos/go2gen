@@ -26,6 +26,7 @@ func (c *Config) GetRealTmpl(rootPath, appName string) *Tmpl {
 		DoDir:       replacePath(c.Tmpl.DoDir, rootPath, appName),
 		ConvDoDir:   replacePath(c.Tmpl.ConvDoDir, rootPath, appName),
 		DaoDir:      replacePath(c.Tmpl.DaoDir, rootPath, appName),
+		ConvIODir:   replacePath(c.Tmpl.ConvIODir, rootPath, appName),
 		RepoDir:     replacePath(c.Tmpl.RepoDir, rootPath, appName),
 		RepoDbalDir: replacePath(c.Tmpl.RepoDbalDir, rootPath, appName),
 		ServiceDir:  replacePath(c.Tmpl.ServiceDir, rootPath, appName),

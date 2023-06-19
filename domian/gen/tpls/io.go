@@ -5,45 +5,39 @@ import (
 	"text/template"
 )
 
-const doTpl = `
-type {{.Name}}Do struct {
+const ioTpl = `
+type {{.Name}} {
 {{- range .Fields}}
 	{{- if eq .SType 4}}
-	{{.Name}} *{{.Type}} {{.Tag}} // {{.Comment}}
+	{{.Name}} {{.Type}} {{.Tag}} // {{.Comment}}
 	{{- else if gt .SType 0}}
 	{{.Name}} string {{.Tag }} // {{.Comment}}
 	{{- else}}
 	{{.Name}} {{.Type}} {{.Tag}} // {{.Comment}}
 	{{- end}}
 {{- end}}
-	DeletedAt gorm.DeletedAt ` + "`" + `db:"deleted_at" gorm:"deleted_at"` + "`" + ` // 软删除标识
-}
-
-func (do *{{.Name}}Do) TableName() string {
-	return TableName{{.Name}}Do
 }
 `
 
-type Do struct {
+type IO struct {
 	Name   string
-	Fields []DoField
+	Fields []IoField
 }
 
-type DoField struct {
-	Name      string
-	Type      string
-	Type2     string
-	SType     int
-	Tag       string
-	ConvSlice bool
-	IsPoint   bool
-	Comment   string
+type IoField struct {
+	Name    string
+	Type    string
+	Type2   string
+	SType   int
+	Tag     string
+	Hidden  bool
+	Comment string
 }
 
-func (s *Do) Execute() ([]byte, error) {
+func (s *IO) Execute() ([]byte, error) {
 	buf := new(bytes.Buffer)
 
-	tmpl, err := template.New(s.Name + "DO").Parse(doTpl)
+	tmpl, err := template.New(s.Name + "IO").Parse(ioTpl)
 	if err != nil {
 		return nil, err
 	}
@@ -53,13 +47,12 @@ func (s *Do) Execute() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-const convDoTpl = `
-
-func From{{.Name}}Entity(input *entity.{{.Name}}) *do.{{.Name}}Do{
+const convIoTpl = `
+func From{{.Name}}Entity(input *entity.{{.Name}}) *types.{{.Name}}{
 	if input == nil {
 		return nil
 	}
-	output := &do.{{.Name}}Do{}
+	output := &types.{{.Name}}{}
 {{- range .Fields }}
 	{{- if eq .SType 1}} 
 		{{- if .IsPoint}} 
@@ -88,7 +81,7 @@ func From{{.Name}}Entity(input *entity.{{.Name}}) *do.{{.Name}}Do{
 	}
 	{{- else if eq .SType 4}}
 		if !input.{{.Name}}.IsZero() {
-			output.{{.Name}} = &input.{{.Name}}
+			output.{{.Name}} = tool_time.TimeToDateTimeString(input.{{.Name}})
 		}
 	{{- else}}
 	output.{{.Name}} = input.{{.Name}}
@@ -97,7 +90,7 @@ func From{{.Name}}Entity(input *entity.{{.Name}}) *do.{{.Name}}Do{
 	return output
 }
 
-func To{{.Name}}Entity(input *do.{{.Name}}Do) *entity.{{.Name}}{
+func To{{.Name}}Entity(input *types.{{.Name}}) *entity.{{.Name}}{
 	if input == nil {
 		return nil
 	}
@@ -119,37 +112,16 @@ func To{{.Name}}Entity(input *do.{{.Name}}Do) *entity.{{.Name}}{
 	}
 	{{- else if eq .SType 2}}
 		if input.{{.Name}} != "" {
-			{{- if .ConvSlice}}
-				{{- if eq .Type2 "int64" }}
-					output.{{.Name}} = slice_utils.ExplodeInt64(input.{{.Name}},",")
-				{{- else if eq .Type2 "int" }}
-					output.{{.Name}} = slice_utils.ExplodeInt(input.{{.Name}},",")
-				{{- else}}
-					output.{{.Name}} = slice_utils.ExplodeStr(input.{{.Name}},",")
-				{{- end}}
-			{{- else}}
-				t := {{.Type}}{}
-				err := json.Unmarshal([]byte(input.{{.Name}}), &t)
-				if err != nil {
-					log.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
-				} else {
-					output.{{.Name}} = t
-				}
-			{{- end}}
+			output.{{.Name}} = input.{{.Name}}
 		}
 	{{- else if eq .SType 3}}
 		if input.{{.Name}} != "" {
-			t := {{.Type}}{}
-			err := json.Unmarshal([]byte(input.{{.Name}}), &t)
-			if err != nil {
-				log.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
-			} else {
-				output.{{.Name}} = t
-			}
+			//t := {{.Type}}{}
+			output.{{.Name}} = To{{.Name}}Entity(input.{{.Name}})
 		}
 	{{- else if eq .SType 4}}
-		if input.{{.Name}} != nil {
-			output.{{.Name}} = *input.{{.Name}}
+		if ts := tool_time.ParseDateTime(input.{{.Name}}); !ts.IsZero() {
+			output.{{.Name}} = ts
 		}
 	{{- else}}
 	output.{{.Name}} = input.{{.Name}}
@@ -158,11 +130,11 @@ func To{{.Name}}Entity(input *do.{{.Name}}Do) *entity.{{.Name}}{
 	return output
 }
 
-func From{{.Name}}List(input entity.{{.Name}}List) do.{{.Name}}DoList {
+func From{{.Name}}List(input entity.{{.Name}}List) []*types.{{.Name}} {
 	if input == nil {
 		return nil
 	}
-	output := make([]*do.{{.Name}}Do, 0, len(input))
+	output := make([]*types.{{.Name}}, 0, len(input))
 	for _, item := range input {
 		resultItem := From{{.Name}}Entity(item)
 		output = append(output, resultItem)
@@ -170,7 +142,7 @@ func From{{.Name}}List(input entity.{{.Name}}List) do.{{.Name}}DoList {
 	return output
 }
 
-func To{{.Name}}List(input do.{{.Name}}DoList) entity.{{.Name}}List {
+func To{{.Name}}List(input []*types.{{.Name}}) entity.{{.Name}}List {
 	if input == nil || len(input) == 0 {
 		return nil
 	}
@@ -184,14 +156,17 @@ func To{{.Name}}List(input do.{{.Name}}DoList) entity.{{.Name}}List {
 
 `
 
-type DoConv struct {
-	Name   string
-	Fields []DoField
+type IoConv struct {
+	SrcPath string
+	Name    string
+	Package string
+	Imports []string
+	Fields  []IoField
 }
 
-func (s *DoConv) Execute() ([]byte, error) {
+func (s *IoConv) Execute() ([]byte, error) {
 	buf := new(bytes.Buffer)
-	tmpl, err := template.New(s.Name + "DOConv").Parse(convDoTpl)
+	tmpl, err := template.New(s.Name + "IOConv").Parse(convIoTpl)
 	if err != nil {
 		return nil, err
 	}

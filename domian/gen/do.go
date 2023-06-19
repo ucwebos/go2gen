@@ -14,13 +14,50 @@ import (
 	"go2gen/domian/parser"
 )
 
-func (m *Manager) Do(xst parser.XST) error {
+func (m *Manager) DoList(xsts map[string]parser.XST) {
+	var (
+		buf  = []byte{}
+		buf2 = []byte{}
+	)
+	for _, xst := range xsts {
+		b1, b2, err := m.Do(xst)
+		if err != nil {
+			log.Panicf("gen io err: %v \n", err)
+		}
+		buf = append(buf, b1...)
+		buf2 = append(buf2, b2...)
+	}
+
+	filename := fmt.Sprintf("%s/do_gen.go", m.Tmpl.DoDir)
+	bufH := m.GenFileHeader("do", []string{
+		"time",
+		"gorm.io/gorm",
+	})
+	buf = append(bufH, buf...)
+	buf = m.format(buf, filename)
+	err := tool_file.WriteFile(filename, buf)
+	if err != nil {
+		log.Printf("io gen [%s] write file err: %v \n", filename, err)
+	}
+
+	filename2 := fmt.Sprintf("%s/do_converter_gen.go", m.Tmpl.ConvDoDir)
+	bufH = m.GenFileHeader("converter", []string{
+		fmt.Sprintf("%s/common/tools/tool_time", conf.Global.ProjectName),
+		fmt.Sprintf("%s/%s/internal/domain/entity", conf.Global.ProjectName, m.AppName),
+		fmt.Sprintf("%s/%s/internal/domain/repo/dbal/do", conf.Global.ProjectName, m.AppName),
+	})
+	buf2 = append(bufH, buf2...)
+	buf2 = m.format(buf2, filename)
+	err = tool_file.WriteFile(filename2, buf2)
+	if err != nil {
+		log.Printf("io conv gen [%s] write file err: %v \n", filename, err)
+	}
+}
+
+func (m *Manager) Do(xst parser.XST) ([]byte, []byte, error) {
 	gdo := tpls.Do{
-		SrcPath: "",
-		Package: "do",
-		Imports: make([]string, 0),
-		Name:    xst.Name,
-		Fields:  make([]tpls.DoField, 0),
+		Name:   xst.Name,
+		Fields: make([]tpls.DoField, 0),
 	}
 	fieldList := make([]parser.XField, 0)
 	for _, field := range xst.FieldList {
@@ -83,21 +120,15 @@ func (m *Manager) Do(xst parser.XST) error {
 		}
 	}
 	if len(gdo.Fields) == 0 {
-		return nil
+		return nil, nil, nil
 	}
-	filename := fmt.Sprintf("%s/%s_do_gen.go", m.Tmpl.DoDir, tool_str.ToSnakeCase(xst.Name))
 	buf, err := gdo.Execute()
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
-	buf = m.format(buf, filename)
-	err = tool_file.WriteFile(filename, buf)
-	if err != nil {
-		log.Printf("do gen [%s] write file err: %v \n", filename, err)
-	}
-	m.dbConv(xst, gdo)
+	buf2, err := m.dbConv(xst, gdo)
 
-	return nil
+	return buf, buf2, nil
 }
 
 func (m *Manager) DoTypeDef() {
@@ -121,27 +152,14 @@ func (m *Manager) DoTypeDef() {
 	}
 }
 
-func (m *Manager) dbConv(xst parser.XST, gdo tpls.Do) error {
+func (m *Manager) dbConv(xst parser.XST, gdo tpls.Do) ([]byte, error) {
 	convGen := tpls.DoConv{
-		Name:    gdo.Name,
-		Package: "converter",
-		Imports: []string{
-			"encoding/json",
-			fmt.Sprintf("%s/%s/internal/domain/entity", conf.Global.ProjectName, m.AppName),
-			fmt.Sprintf("%s/%s/internal/domain/repo/dbal/do", conf.Global.ProjectName, m.AppName),
-		},
+		Name:   gdo.Name,
 		Fields: gdo.Fields,
 	}
-	filename := fmt.Sprintf("%s/%s_converter_gen.go", m.Tmpl.ConvDoDir, tool_str.ToSnakeCase(xst.Name))
 	buf, err := convGen.Execute()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	buf = m.format(buf, filename)
-	err = tool_file.WriteFile(filename, buf)
-	if err != nil {
-		log.Printf("do gen [%s] write file err: %v \n", filename, err)
-	}
-
-	return nil
+	return buf, nil
 }

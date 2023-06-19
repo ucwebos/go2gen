@@ -19,6 +19,7 @@ var (
 		EntityDir:   "{appPath}/internal/domain/entity",
 		RepoDir:     "{appPath}/internal/domain/repo",
 		RepoDbalDir: "{appPath}/internal/domain/repo/dbal",
+		ConvIODir:   "{appPath}/internal/domain/converter",
 		DoDir:       "{appPath}/internal/domain/repo/dbal/do",
 		ConvDoDir:   "{appPath}/internal/domain/repo/dbal/converter",
 		DaoDir:      "{appPath}/internal/domain/repo/dbal/dao",

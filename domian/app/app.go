@@ -15,6 +15,7 @@ type App struct {
 
 func NewApp(rootPath string, appName string) *App {
 	return &App{
+		Pwd:      fmt.Sprintf("%s/%s", rootPath, appName),
 		Name:     appName,
 		RootPath: rootPath,
 		Tmpl:     conf.Global.GetRealTmpl(rootPath, appName),

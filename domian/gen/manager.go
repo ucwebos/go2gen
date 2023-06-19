@@ -5,7 +5,6 @@ import (
 	"go/format"
 	"go2gen/conf"
 	"log"
-	"os/exec"
 	"sort"
 	"strings"
 
@@ -184,20 +183,6 @@ func (m *Manager) GI(iParser *parser.IParser) error {
 	err = tool_file.WriteFile(filename, buf)
 	if err != nil {
 		log.Printf("app gen [%s] write file err: %v \n", filename, err)
-	}
-	return nil
-}
-
-func (m *Manager) Protoc(pbFile string) error {
-	cmd := exec.Command("protoc", "-I", ".", "-I", "./third_party", "--gogofast_out", "../../", "--go-grpc_out", "../../", "--swagger_out=logtostderr=true:.", pbFile)
-	if strings.HasSuffix(pbFile, "_gen.proto") || strings.HasSuffix(pbFile, "/base.proto") {
-		cmd = exec.Command("protoc", "-I", ".", "-I", "./third_party", "--gogofast_out", "../../", "--go-grpc_out", "../../", pbFile)
-	}
-	cmd.Dir = m.Project.RootPath() + "/proto"
-	_, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Println(pbFile)
-		log.Printf("run main error %v", err)
 	}
 	return nil
 }
