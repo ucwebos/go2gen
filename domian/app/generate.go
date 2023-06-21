@@ -35,14 +35,7 @@ func (a *App) Generate() error {
 
 	gm := gen.NewManager(a.Tmpl, a.Name, a.Pwd)
 	entityPkg := pkgList[a.Tmpl.EntityDir]
-	// entity 生成
-	//for _, xst := range entityPkg.Parser.StructList {
-	//	err := gm.Do(xst)
-	//	if err != nil {
-	//		log.Printf("gen do err: %v \n", err)
-	//		return err
-	//	}
-	//}
+
 	gm.DoList(entityPkg.Parser.StructList)
 
 	gm.IOApi(entityPkg.Parser.StructList)
@@ -50,6 +43,10 @@ func (a *App) Generate() error {
 	gm.EntityTypeDef()
 	// do 的TypeDef
 	gm.DoTypeDef()
+
+	for _, xst := range entityPkg.Parser.StructList {
+		a.CRepo(xst.Name)
+	}
 
 	if err := a.Dao(); err != nil {
 		log.Printf("Dao app[%s] err: %v", a.Name, err)

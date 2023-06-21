@@ -2,6 +2,7 @@ package gen
 
 import (
 	"fmt"
+	"github.com/xbitgo/core/tools/tool_str"
 	"go2gen/conf"
 	"log"
 	"sort"
@@ -68,7 +69,7 @@ func (m *Manager) IO(xst parser.XST) ([]byte, []byte, error) {
 			continue
 		}
 		if tagIO != nil {
-			if tagIO.Txt == "-" {
+			if tagIO.Txt == "ignore" {
 				continue
 			}
 			if tagIO.Txt != "" {
@@ -76,31 +77,37 @@ func (m *Manager) IO(xst parser.XST) ([]byte, []byte, error) {
 			}
 		}
 
-		//type2 := ""
+		type2 := ""
+		type2Entity := false
 		tags := fmt.Sprintf("`json:\"%s\"`", tagJSON.Name)
 		fType := field.Type
 		switch field.SType {
 		case 1:
-			//type2 = strings.Replace(field.Type, "*", "", 1)
+			type2 = strings.Replace(field.Type, "*", "", 1)
 			if strings.Contains(field.Type, "time.Time") {
 				//type2 = strings.Replace(field.Type, "*", "", 1)
 				field.SType = parser.STypeTime
 				fType = "string"
 			}
 		case 2:
-			//type2 = strings.Replace(field.Type, "[]", "", 1)
+			type2 = strings.Replace(field.Type, "[]", "", 1)
+			type2 = strings.Replace(type2, "*", "", 1)
+			if tool_str.UFirst(type2) {
+				type2Entity = true
+			}
 			//fType = AddEntityPkg(fType)
 		case 3:
 			//fType = AddEntityPkg(fType)
 		}
 
 		gio.Fields = append(gio.Fields, tpls.IoField{
-			Name: field.Name,
-			Type: fType,
-			//Type2:   type2,
-			SType:   field.SType,
-			Tag:     tags,
-			Comment: field.Comment,
+			Name:        field.Name,
+			Type:        fType,
+			Type2:       type2,
+			Type2Entity: type2Entity,
+			SType:       field.SType,
+			Tag:         tags,
+			Comment:     field.Comment,
 		})
 	}
 

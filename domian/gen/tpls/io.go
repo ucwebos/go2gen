@@ -8,13 +8,7 @@ import (
 const ioTpl = `
 type {{.Name}} {
 {{- range .Fields}}
-	{{- if eq .SType 4}}
 	{{.Name}} {{.Type}} {{.Tag}} // {{.Comment}}
-	{{- else if gt .SType 0}}
-	{{.Name}} string {{.Tag }} // {{.Comment}}
-	{{- else}}
-	{{.Name}} {{.Type}} {{.Tag}} // {{.Comment}}
-	{{- end}}
 {{- end}}
 }
 `
@@ -25,13 +19,14 @@ type IO struct {
 }
 
 type IoField struct {
-	Name    string
-	Type    string
-	Type2   string
-	SType   int
-	Tag     string
-	Hidden  bool
-	Comment string
+	Name        string
+	Type        string
+	Type2       string
+	Type2Entity bool
+	SType       int
+	Tag         string
+	Hidden      bool
+	Comment     string
 }
 
 func (s *IO) Execute() ([]byte, error) {
@@ -54,30 +49,19 @@ func From{{.Name}}Entity(input *entity.{{.Name}}) *types.{{.Name}}{
 	}
 	output := &types.{{.Name}}{}
 {{- range .Fields }}
-	{{- if eq .SType 1}} 
-		{{- if .IsPoint}} 
-	if input.{{.Name}} != nil {
-		b, _ := json.Marshal(input.{{.Name}})
-		output.{{.Name}} = string(b)
-	}
-		{{- else}}
-	b, _ := json.Marshal(input.{{.Name}})
-	output.{{.Name}} = string(b)
-		{{- end}}
-	
+	{{- if eq .SType 1}}
+	output.{{.Name}} = From{{.Type2}}Entity(input.{{.Name}})
 	{{- else if eq .SType 2}}
 	if input.{{.Name}} != nil {
-		{{- if .ConvSlice}}
-			output.{{.Name}} = slice_utils.Implode(input.{{.Name}},",")
+		{{- if .Type2Entity}}
+		output.{{.Name}} = From{{.Type2}}List(input.{{.Name}})
 		{{- else}}
-		b, _ := json.Marshal(input.{{.Name}})
-		output.{{.Name}} = string(b)
+		output.{{.Name}} = input.{{.Name}}
 		{{- end}}
 	}
 	{{- else if eq .SType 3}}
 	if input.{{.Name}} != nil {
-		b, _ := json.Marshal(input.{{.Name}})
-		output.{{.Name}} = string(b)
+		output.{{.Name}} = input.{{.Name}}
 	}
 	{{- else if eq .SType 4}}
 		if !input.{{.Name}}.IsZero() {
@@ -97,23 +81,13 @@ func To{{.Name}}Entity(input *types.{{.Name}}) *entity.{{.Name}}{
 	output := &entity.{{.Name}}{}
 {{- range .Fields }}
 	{{- if eq .SType 1}} 
-	if input.{{.Name}} != ""  {
-		{{- if .IsPoint}} 
-		t := &entity.{{ .Type2}}{}
-		{{- else}}
-		t := entity.{{ .Type2}}{}
-		{{- end}}
-		err := json.Unmarshal([]byte(input.{{.Name}}), &t)
-		if err != nil {
-			log.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
-		} else {
-			output.{{.Name}} = t
-		}
-	}
+	output.{{.Name}} = To{{.Type2}}Entity(input.{{.Name}})
 	{{- else if eq .SType 2}}
-		if input.{{.Name}} != "" {
-			output.{{.Name}} = input.{{.Name}}
-		}
+		{{- if .Type2Entity}}
+		output.{{.Name}} = To{{.Type2}}List(input.{{.Name}})
+		{{- else}}
+		output.{{.Name}} = input.{{.Name}}
+		{{- end}}
 	{{- else if eq .SType 3}}
 		if input.{{.Name}} != "" {
 			//t := {{.Type}}{}

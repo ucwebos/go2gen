@@ -66,13 +66,13 @@ import (
 	"{{.ProjectName}}/{{.AppName}}/internal/domain/repo/dbal/dao"
 	"{{.ProjectName}}/{{.AppName}}/internal/domain/repo/dbal/do"
 
-	"{{.ProjectName}}/common/lib"
+	"{{.ProjectName}}/common/lib/db"
 	"{{.ProjectName}}/common/tools/filterx"
 )
 
 // {{.EntityName}}RepoDBAL .
 type {{.EntityName}}RepoDBAL struct {
-	DB  *lib.DBWrapper 
+	DB  *db.DBWrapper 
 	Dao *dao.{{.EntityName}}Dao
 }
 
