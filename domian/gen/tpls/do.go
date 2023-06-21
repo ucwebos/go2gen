@@ -112,7 +112,7 @@ func To{{.Name}}Entity(input *do.{{.Name}}Do) *entity.{{.Name}}{
 		{{- end}}
 		err := json.Unmarshal([]byte(input.{{.Name}}), &t)
 		if err != nil {
-			log.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
+			logx.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
 		} else {
 			output.{{.Name}} = t
 		}
@@ -131,7 +131,7 @@ func To{{.Name}}Entity(input *do.{{.Name}}Do) *entity.{{.Name}}{
 				t := {{.Type}}{}
 				err := json.Unmarshal([]byte(input.{{.Name}}), &t)
 				if err != nil {
-					log.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
+					logx.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
 				} else {
 					output.{{.Name}} = t
 				}
@@ -142,7 +142,7 @@ func To{{.Name}}Entity(input *do.{{.Name}}Do) *entity.{{.Name}}{
 			t := {{.Type}}{}
 			err := json.Unmarshal([]byte(input.{{.Name}}), &t)
 			if err != nil {
-				log.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
+				logx.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
 			} else {
 				output.{{.Name}} = t
 			}
