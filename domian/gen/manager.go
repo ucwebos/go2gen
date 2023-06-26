@@ -62,6 +62,7 @@ func (m *Manager) EntityTypeDef() {
 
 func (m *Manager) _typedef(xst parser.XST) ([]byte, error) {
 	tGen := tpls.EntityTypeMap{
+		ProjectName:    conf.Global.ProjectName,
 		EntityName:     xst.Name,
 		EntityListName: fmt.Sprintf("%sList", xst.Name),
 		Field:          make([]tpls.Field, 0),

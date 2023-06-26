@@ -21,7 +21,9 @@ type IParser struct {
 	OtherStruct  map[string]XST
 	ConstStrList map[string]string
 	BindFuncMap  map[string]map[string]XMethod
+	FuncList     map[string]XMethod
 	NewFuncList  map[string]XMethod
+	EntryModules []EntryModule
 	ParseType    int
 }
 
@@ -199,7 +201,11 @@ func (x XField) GetTag(tag string) *TagItem {
 	if rs := re.FindStringSubmatch(x.Tag); len(rs) > 0 {
 		txt := rs[1]
 		if txt == "-" {
-			return nil
+			return &TagItem{
+				Name: "-",
+				Txt:  "-",
+				Opts: map[string]string{},
+			}
 		}
 		it := &TagItem{
 			Name: txt,
@@ -228,4 +234,32 @@ func (x XField) GetTag(tag string) *TagItem {
 		return it
 	}
 	return nil
+}
+
+type EntryModule struct {
+	Name       string
+	Key        string
+	Middleware []string
+	WithCommon bool
+	FuncList   []*EntryModuleFunc
+}
+
+type EntryModuleFunc struct {
+	idx        int
+	Name       string
+	Key        string
+	KeyLi      string
+	Middleware []string
+	Request    *EntryModuleFuncReq
+	Response   *EntryModuleFuncResp
+}
+
+type EntryModuleFuncReq struct {
+	Name string `json:"name"`
+	XST  XST    `json:"xst"`
+}
+
+type EntryModuleFuncResp struct {
+	Name string `json:"name"`
+	XST  XST    `json:"xst"`
 }

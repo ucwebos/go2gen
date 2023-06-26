@@ -38,25 +38,71 @@ func (a *App) Generate() error {
 
 	gm.DoList(entityPkg.Parser.StructList)
 
-	gm.IOApi(entityPkg.Parser.StructList)
+	for _, entry := range a.getEntries() {
+		gm.IOEntries(entityPkg.Parser.StructList, entry)
+	}
 
 	gm.EntityTypeDef()
 	// do 的TypeDef
 	gm.DoTypeDef()
 
+	// c.repo
 	for _, xst := range entityPkg.Parser.StructList {
 		a.CRepo(xst.Name)
 	}
 
+	// dao
 	if err := a.Dao(); err != nil {
 		log.Printf("Dao app[%s] err: %v", a.Name, err)
 		return err
 	}
+
+	// conv
 	if err := a.Conv(); err != nil {
 		log.Printf("Conv app[%s] err: %v", a.Name, err)
 		return err
 	}
 
+	// handler
+	a.BatchHandlerAndDoc()
+
+	// GI
+	if err := a.BatchGI(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *App) BatchHandlerAndDoc() error {
+	gm := gen.NewManager(a.Tmpl, a.Name, a.Pwd)
+	for _, entry := range a.getEntries() {
+		gm.HandlerAndDoc(entry)
+	}
+	return nil
+}
+
+func (a *App) BatchGI() error {
+	var (
+		dirs    = a.parseDirs()
+		pkgList = map[string]*Pkg{}
+	)
+	for _, dir := range dirs {
+		pkg := &Pkg{
+			Dir: dir,
+		}
+		if dir == a.Tmpl.EntityDir {
+			pkg.IsEntity = true
+		}
+		pr, err := parser.Scan(dir, parser.ParseTypeWatch)
+		if err != nil {
+			log.Printf("generate parser pkg[%s] err: %v \n", dir, err)
+			return err
+		}
+		pkg.Parser = pr
+		pkgList[dir] = pkg
+	}
+	gm := gen.NewManager(a.Tmpl, a.Name, a.Pwd)
 	// 其他的 DI生成
 	for s, pkg := range pkgList {
 		if s == a.Tmpl.EntityDir {
@@ -71,6 +117,5 @@ func (a *App) Generate() error {
 			return err
 		}
 	}
-
 	return nil
 }

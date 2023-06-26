@@ -5,7 +5,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
@@ -16,9 +15,10 @@ import (
 )
 
 const (
-	ParseTypeWatch = 1
-	ParseTypeImpl  = 2
-	ParseTypeDo    = 3
+	ParseTypeWatch   = 1
+	ParseTypeImpl    = 2
+	ParseTypeDo      = 3
+	ParseTypeHandler = 4
 )
 
 func Scan(pwd string, parseType int) (ips *IParser, err error) {
@@ -30,11 +30,13 @@ func Scan(pwd string, parseType int) (ips *IParser, err error) {
 		OtherStruct:  make(map[string]XST, 0),
 		ConstStrList: make(map[string]string),
 		BindFuncMap:  map[string]map[string]XMethod{},
+		FuncList:     map[string]XMethod{},
 		NewFuncList:  map[string]XMethod{},
+		EntryModules: []EntryModule{},
 		ParseType:    parseType,
 	}
 	// 遍历文件夹解析go代码
-	fileInfos, err := ioutil.ReadDir(pwd)
+	fileInfos, err := os.ReadDir(pwd)
 	if err != nil {
 		return
 	}
@@ -94,6 +96,9 @@ func (ips *IParser) LoadBinds() {
 var reImpl, _ = regexp.Compile(`@IMPL\[([\w|.]+)]`)
 var reDi, _ = regexp.Compile(`@DI\[([\w|.]+)]`)
 
+var reModule, _ = regexp.Compile(`(\S+)\(([\w|.]+)\)`)
+var reMiddleware, _ = regexp.Compile(`@MIDDLEWARE\[([\w|.]+)]`)
+
 func (ips *IParser) ParseFile(pwd string) error {
 	r, err := os.Open(pwd)
 	if err != nil {
@@ -127,74 +132,161 @@ func (ips *IParser) ParseFile(pwd string) error {
 					imports = append(imports, xSpec.Path.Value)
 				}
 			case token.TYPE:
-				var (
-					used    = true
-					ImplINF = ""
-					GIName  = ""
-					GI      = false
-				)
-				if x.Doc != nil && len(x.Doc.List) >= 0 {
-					for _, comment := range x.Doc.List {
-						if strings.Index(comment.Text, "@IGNORE") > 0 {
-							used = false
-						}
-						if strings.Contains(comment.Text, "@IMPL[") {
-							r := reImpl.FindStringSubmatch(comment.Text)
-							if len(r) > 1 {
-								ImplINF = r[1]
+				if ips.ParseType == ParseTypeHandler {
+					module := EntryModule{
+						Name:       "",
+						Key:        "",
+						Middleware: []string{},
+						WithCommon: false,
+						FuncList:   make([]*EntryModuleFunc, 0),
+					}
+					if x.Doc != nil && len(x.Doc.List) >= 0 {
+						for _, comment := range x.Doc.List {
+							if strings.Index(comment.Text, "@COMMON") > 0 {
+								module.WithCommon = true
+							}
+							r := reModule.FindStringSubmatch(comment.Text)
+							if len(r) == 3 {
+								module.Name = r[1]
+								module.Key = r[2]
+							}
+							if strings.Contains(comment.Text, "@MIDDLEWARE[") {
+								r := reMiddleware.FindStringSubmatch(comment.Text)
+								if len(r) == 2 {
+									list := strings.Split(r[1], ",")
+									module.Middleware = list
+								}
 							}
 						}
-						if strings.Contains(comment.Text, "@GI") {
-							GI = true
-							r := reDi.FindStringSubmatch(comment.Text)
-							if len(r) > 1 {
-								GIName = r[1]
+					}
+					tmpFuncs := map[string]*EntryModuleFunc{}
+					for i, spec := range x.Specs {
+						var isReq = false
+						xSpec := spec.(*ast.TypeSpec)
+						nameDoc := xSpec.Doc.Text()
+						name := xSpec.Name.Name
+						key := ""
+						if !strings.HasSuffix(name, "Req") && !strings.HasSuffix(name, "Resp") {
+							continue
+						}
+						if strings.HasSuffix(name, "Req") {
+							isReq = true
+							key = strings.TrimSuffix(name, "Req")
+						} else {
+							key = strings.TrimSuffix(name, "Resp")
+						}
+
+						switch xt := xSpec.Type.(type) {
+						case *ast.StructType:
+							xst := XST{
+								Imports:   imports,
+								File:      pwd,
+								Name:      name,
+								CST:       make([]string, 0),
+								Methods:   make(map[string]XMethod, 0),
+								FieldList: make(map[string]XField, 0),
 							}
+							fields, child := getStructField(xt)
+							xst.CST = child
+							xst.FieldList = fields
+							_, ok := tmpFuncs[key]
+							if !ok {
+								tmpFuncs[key] = &EntryModuleFunc{
+									idx:   i,
+									Name:  strings.TrimSuffix(nameDoc, "\n"),
+									Key:   key,
+									KeyLi: strings.ReplaceAll(tool_str.ToSnakeCase(key), "_", "-"),
+								}
+							}
+							if isReq {
+								tmpFuncs[key].Request = &EntryModuleFuncReq{
+									Name: name,
+									XST:  xst,
+								}
+							} else {
+								tmpFuncs[key].Response = &EntryModuleFuncResp{
+									Name: name,
+									XST:  xst,
+								}
+							}
+						}
+					}
+
+					for _, moduleFunc := range tmpFuncs {
+						module.FuncList = append(module.FuncList, moduleFunc)
+					}
+					ips.EntryModules = append(ips.EntryModules, module)
+				} else {
+					var (
+						used    = true
+						ImplINF = ""
+						GIName  = ""
+						GI      = false
+					)
+					if x.Doc != nil && len(x.Doc.List) >= 0 {
+						for _, comment := range x.Doc.List {
+							if strings.Index(comment.Text, "@IGNORE") > 0 {
+								used = false
+							}
+							if strings.Contains(comment.Text, "@IMPL[") {
+								r := reImpl.FindStringSubmatch(comment.Text)
+								if len(r) > 1 {
+									ImplINF = r[1]
+								}
+							}
+							if strings.Contains(comment.Text, "@GI") {
+								GI = true
+								r := reDi.FindStringSubmatch(comment.Text)
+								if len(r) > 1 {
+									GIName = r[1]
+								}
+							}
+						}
+					}
+
+					for _, spec := range x.Specs {
+						xSpec := spec.(*ast.TypeSpec)
+						name := xSpec.Name.Name
+						switch xt := xSpec.Type.(type) {
+						case *ast.InterfaceType:
+							if ips.ParseType != ParseTypeImpl {
+								continue
+							}
+							if !used {
+								continue
+							}
+							inf := INF{
+								Imports: imports,
+								File:    pwd,
+								Name:    name,
+								Methods: make(map[string]XMethod, 0),
+							}
+							inf.Methods = getInterfaceFunc(xt)
+							ips.INFList[name] = inf
+						case *ast.StructType:
+							xst := XST{
+								GIName:    GIName,
+								GI:        GI,
+								ImplINF:   ImplINF,
+								Imports:   imports,
+								File:      pwd,
+								Name:      name,
+								CST:       make([]string, 0),
+								Methods:   make(map[string]XMethod, 0),
+								FieldList: make(map[string]XField, 0),
+							}
+							fields, child := getStructField(xt)
+							xst.CST = child
+							xst.FieldList = fields
+							if !used {
+								ips.OtherStruct[name] = xst
+								continue
+							}
+							ips.StructList[name] = xst
 						}
 					}
 				}
 
-				for _, spec := range x.Specs {
-					xSpec := spec.(*ast.TypeSpec)
-					name := xSpec.Name.Name
-					switch xt := xSpec.Type.(type) {
-					case *ast.InterfaceType:
-						if ips.ParseType != ParseTypeImpl {
-							continue
-						}
-						if !used {
-							continue
-						}
-						inf := INF{
-							Imports: imports,
-							File:    pwd,
-							Name:    name,
-							Methods: make(map[string]XMethod, 0),
-						}
-						inf.Methods = getInterfaceFunc(xt)
-						ips.INFList[name] = inf
-					case *ast.StructType:
-						xst := XST{
-							GIName:    GIName,
-							GI:        GI,
-							ImplINF:   ImplINF,
-							Imports:   imports,
-							File:      pwd,
-							Name:      name,
-							CST:       make([]string, 0),
-							Methods:   make(map[string]XMethod, 0),
-							FieldList: make(map[string]XField, 0),
-						}
-						fields, child := getStructField(xt)
-						xst.CST = child
-						xst.FieldList = fields
-						if !used {
-							ips.OtherStruct[name] = xst
-							continue
-						}
-						ips.StructList[name] = xst
-					}
-				}
 			case token.CONST:
 				if ips.ParseType != ParseTypeDo {
 					continue
@@ -231,6 +323,11 @@ func (ips *IParser) ParseFile(pwd string) error {
 				}
 				ips.BindFuncMap[bindName][mtd.Name] = mtd
 			} else {
+				mtd := XMethod{
+					Name: x.Name.Name,
+				}
+				mtd.Params, mtd.Results = getFuncArgs(x.Type)
+				ips.FuncList[x.Name.Name] = mtd
 				if strings.HasPrefix(x.Name.Name, "New") {
 					mtd := XMethod{
 						Name: x.Name.Name,

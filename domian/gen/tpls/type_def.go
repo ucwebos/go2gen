@@ -13,7 +13,7 @@ package %s
 import (
 	"encoding/json"
 
-    "miman/common/tools/tool_slice"
+    "{{.ProjectName}}/common/tools/tool_slice"
 )
 `
 
@@ -212,6 +212,7 @@ func (list {{.EntityListName}}) GroupByInt64(visitor func(item *{{.EntityName}})
 `
 
 type EntityTypeMap struct {
+	ProjectName    string
 	EntityName     string
 	EntityListName string
 	Field          []Field

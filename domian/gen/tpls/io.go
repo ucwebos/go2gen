@@ -6,7 +6,7 @@ import (
 )
 
 const ioTpl = `
-type {{.Name}} {
+type {{.Name}} struct{
 {{- range .Fields}}
 	{{.Name}} {{.Type}} {{.Tag}} // {{.Comment}}
 {{- end}}

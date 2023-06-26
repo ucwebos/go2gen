@@ -12,10 +12,10 @@ type Tmpl struct {
 	DoDir       string `json:"do_dir" yaml:"do_dir"`
 	ConvDoDir   string `json:"conv_do_dir" yaml:"conv_do_dir"`
 	DaoDir      string `json:"dao_dir" yaml:"dao_dir"`
-	ConvIODir   string `json:"conv_io_dir" yaml:"conv_io_dir"`
 	RepoDir     string `json:"repo_dir" yaml:"repo_dir"`
 	RepoDbalDir string `json:"repo_dbal_dir" yaml:"repo_dbal_dir"`
 	ServiceDir  string `json:"service_dir" yaml:"service_dir"`
+	EntryDir    string `json:"entry_dir" yaml:"entry_dir"`
 }
 
 func (c *Config) GetRealTmpl(rootPath, appName string) *Tmpl {
@@ -26,10 +26,10 @@ func (c *Config) GetRealTmpl(rootPath, appName string) *Tmpl {
 		DoDir:       replacePath(c.Tmpl.DoDir, rootPath, appName),
 		ConvDoDir:   replacePath(c.Tmpl.ConvDoDir, rootPath, appName),
 		DaoDir:      replacePath(c.Tmpl.DaoDir, rootPath, appName),
-		ConvIODir:   replacePath(c.Tmpl.ConvIODir, rootPath, appName),
 		RepoDir:     replacePath(c.Tmpl.RepoDir, rootPath, appName),
 		RepoDbalDir: replacePath(c.Tmpl.RepoDbalDir, rootPath, appName),
 		ServiceDir:  replacePath(c.Tmpl.ServiceDir, rootPath, appName),
+		EntryDir:    replacePath(c.Tmpl.EntryDir, rootPath, appName),
 	}
 }
 

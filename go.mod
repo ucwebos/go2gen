@@ -3,9 +3,9 @@ module go2gen
 go 1.16
 
 require (
-	github.com/emicklei/proto v1.9.2
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/jmoiron/sqlx v1.3.5
+	github.com/json-iterator/go v1.1.12
 	github.com/lib/pq v1.10.2 // indirect
 	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	github.com/spf13/cobra v1.3.0

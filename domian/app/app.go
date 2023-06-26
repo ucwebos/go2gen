@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go2gen/conf"
 	"go2gen/domian/gen"
+	"os"
 )
 
 type App struct {
@@ -31,12 +32,10 @@ func (a *App) parseDirs() (dirs []string) {
 	}
 	dirTmpUniMap := map[string]struct{}{}
 	for _, dir := range dirs {
-		fmt.Println(dir)
 		dirTmpUniMap[dir] = struct{}{}
 	}
 	items := a.ScanDir(a.Tmpl.DomainDir)
 	for _, item := range items {
-		fmt.Println(item)
 		if _, ok := dirTmpUniMap[item]; ok {
 			continue
 		}
@@ -44,6 +43,20 @@ func (a *App) parseDirs() (dirs []string) {
 		dirs = append(dirs, item)
 	}
 	return dirs
+}
+
+func (a *App) getEntries() (entries []string) {
+	fileInfos, err := os.ReadDir(a.Tmpl.EntryDir)
+	if err != nil {
+		return
+	}
+	dirList := make([]string, 0)
+	for _, fi := range fileInfos {
+		if fi.IsDir() {
+			dirList = append(dirList, fi.Name())
+		}
+	}
+	return dirList
 }
 
 func (a *App) CRepo(entity string) error {
@@ -59,7 +72,6 @@ func (a *App) CService(entity string) error {
 func (a *App) Tests() error {
 	return nil
 }
-
 func (a *App) Dao() error {
 	gm := gen.NewManager(a.Tmpl, a.Name, a.Pwd)
 	return gm.Dao()
