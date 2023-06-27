@@ -15,8 +15,6 @@ import (
 )
 
 var (
-	once = sync.Once{}
-
 	{{- range .List}}
 		{{.NameVal}}Instance *{{.Name}}
 	{{- end}}
@@ -25,7 +23,7 @@ var (
 
 {{- range .List}}
 func {{.Name}}Instance() *{{.Name}} {
-	once.Do(func() {
+	if {{.NameVal}}Instance == nil {
 		{{- if ne .NewReturnsLen 0}}
 			{{- if ge .NewReturnsLen 2 }}
 			 _{{.NameVal}}, err := New{{.Name}}()
@@ -39,7 +37,7 @@ func {{.Name}}Instance() *{{.Name}} {
 			_{{.NameVal}} := &{{.Name}}{}
 		{{- end}}
 		{{.NameVal}}Instance = _{{.NameVal}}
-	})
+	}
 	return {{.NameVal}}Instance
 }
 {{- end}}
