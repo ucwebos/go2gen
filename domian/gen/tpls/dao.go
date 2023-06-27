@@ -127,8 +127,11 @@ func (dao *{{.DaoName}}) FindAll(db *gorm.DB) (do.{{.EntityListName}}, error) {
 func (dao *{{.DaoName}}) Get(db *gorm.DB) (*do.{{.EntityName}}, error) {
     db.Table({{.TableName}})
 	result := &do.{{.EntityName}}{}
-	err := db.Limit(1).Find(result).Error
+	err := db.First(result).Error
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
 		return nil, errors.New("记录获取失败")
 	}
 	return result, nil
