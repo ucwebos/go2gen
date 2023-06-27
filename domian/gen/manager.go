@@ -44,7 +44,7 @@ func (m *Manager) EntityTypeDef() {
 	if err != nil {
 		log.Fatalf("EntityTypeDef: parse dir[%s], err: %v", m.Tmpl.EntityDir, err)
 	}
-	bufs := []byte(fmt.Sprintf(tpls.EntityTypeDefCodes, "entity"))
+	bufs := []byte(fmt.Sprintf(tpls.EntityTypeDefCodes, "entity", conf.Global.ProjectName))
 	for _, xst := range ipr.StructList {
 		buf, err := m._typedef(xst)
 		if err != nil {

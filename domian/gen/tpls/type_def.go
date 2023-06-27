@@ -13,7 +13,7 @@ package %s
 import (
 	"encoding/json"
 
-    "{{.ProjectName}}/common/tools/tool_slice"
+    "%s/common/tools/tool_slice"
 )
 `
 

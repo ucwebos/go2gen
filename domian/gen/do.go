@@ -137,7 +137,7 @@ func (m *Manager) DoTypeDef() {
 	if err != nil {
 		log.Fatalf("do2Sql: parse dir[%s], err: %v", m.Tmpl.DoDir, err)
 	}
-	bufs := []byte(fmt.Sprintf(tpls.EntityTypeDefCodes, "do"))
+	bufs := []byte(fmt.Sprintf(tpls.EntityTypeDefCodes, "do", conf.Global.ProjectName))
 	for _, xst := range ipr.StructList {
 		buf, err := m._typedef(xst)
 		if err != nil {
