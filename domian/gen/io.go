@@ -71,7 +71,7 @@ func (m *Manager) IO(xst parser.XST, tagName string) ([]byte, []byte, error) {
 			continue
 		}
 		if tagIO != nil {
-			if tagIO.Txt == "_" {
+			if tagIO.Txt == "-" {
 				continue
 			}
 			if tagIO.Txt != "" {

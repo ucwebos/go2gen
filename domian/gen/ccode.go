@@ -21,7 +21,7 @@ func (m *Manager) CRepo(entity string) error {
 	for _, it := range ipr.StructList {
 		for _, field := range it.FieldList {
 			tag := field.GetTag("db")
-			if tag != nil {
+			if tag != nil && tag.Txt != "-" {
 				entityList = append(entityList, it.Name)
 				break
 			}
@@ -85,7 +85,7 @@ func (m *Manager) CService(entity string) error {
 	for _, it := range ipr.StructList {
 		for _, field := range it.FieldList {
 			tag := field.GetTag("db")
-			if tag != nil {
+			if tag != nil && tag.Txt != "-" {
 				entityList = append(entityList, it.Name)
 				break
 			}

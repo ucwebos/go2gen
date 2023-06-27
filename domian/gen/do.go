@@ -69,7 +69,7 @@ func (m *Manager) Do(xst parser.XST) ([]byte, []byte, error) {
 	})
 	for _, field := range fieldList {
 		tagDesc := field.GetTag("db")
-		if tagDesc != nil {
+		if tagDesc != nil && tagDesc.Txt != "-" {
 			tag := tagDesc.Txt
 			convSlice := false
 			isPoint := false
