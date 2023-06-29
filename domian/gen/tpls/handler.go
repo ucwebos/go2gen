@@ -35,9 +35,14 @@ type HandlerFunc struct {
 
 const HandlerFuncAppendTpl = `
 {{range .FuncList}}
-func {{.Key}}(ctx *gin.Context, req *types.{{.Request.Name}}) (resp *types.{{.Response.Name}}, err error) {
+func {{.Key}}(ctx *gin.Context{{if ne .Request nil}}, req *types.{{.Request.Name}}{{end}}) ({{- if ne .Response nil}}*types.{{.Response.Name}}{{end}}, error) {
+	{{- if ne .Response nil}}
+	var (
+		resp = &types.{{.Response.Name}}{}
+	)
+	{{- end}}
 	// todo ...
-	return resp, nil
+	return {{if ne .Response nil}}resp, {{end}}nil
 }
 {{end}}
 `

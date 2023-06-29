@@ -25,15 +25,14 @@ func generated(r *gin.Engine) {
 		{{- range $v := $it.FuncList}}
 		// {{$v.Name}}
 		r.POST("/{{$.Entry}}/{{$it.Key}}/{{$v.KeyLi}}", func(ctx *gin.Context) {
-			{{- if $it.WithCommon}}
-			if err := commonVerify(ctx); err != nil {
+			_raw, err := commonVerify(ctx)
+			if err != nil {
 				common.JSONError(ctx, err.(common.ErrCode))
 				return
 			}
-			{{- end}}
 			{{- if ne $v.Request nil}}
 			var req = &types.{{$v.Request.Name}}{}
-			if err := common.BindBody(ctx, &req); err != nil {
+			if err := common.BindBody(_raw, &req); err != nil {
 				common.JSONError(ctx, common.ErrParams)
 				return
 			}
