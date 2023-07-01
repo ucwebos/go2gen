@@ -28,11 +28,11 @@ func (e *{{$.EntityName}}) EntityName() string {
 	return "{{$.EntityName}}"
 }
 
-func (e *{{$.EntityName}}) ModifyDBMap(e2 *{{$.EntityName}},fields []string) map[string]interface{} {
+func (e *{{$.EntityName}}) ModifyDBMap(e2 *{{$.EntityName}},fields []string) map[string]any {
 	if e == nil || e2 == nil || fields == nil {
 		return nil
 	}
-	tmp := make(map[string]interface{})
+	tmp := make(map[string]any)
 	{{- range $field := .Field}}
 		{{- if ne $field.DBTag ""}} 
 			{{- if $field.UseJSON}}
@@ -44,7 +44,7 @@ func (e *{{$.EntityName}}) ModifyDBMap(e2 *{{$.EntityName}},fields []string) map
 			{{- end}}
 		{{- end}}
 	{{- end}}
-	output := make(map[string]interface{})
+	output := make(map[string]any)
 	for _, field := range fields {
 		if v, ok := tmp[field]; ok {
 			output[field] = v
@@ -53,8 +53,8 @@ func (e *{{$.EntityName}}) ModifyDBMap(e2 *{{$.EntityName}},fields []string) map
 	return output
 }
 
-func (e *{{$.EntityName}}) ToTagMap(tagName string) map[string]interface{} {
-	out := make(map[string]interface{})
+func (e *{{$.EntityName}}) ToTagMap(tagName string) map[string]any {
+	out := make(map[string]any)
 	v := reflect.ValueOf(e)
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {

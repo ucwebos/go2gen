@@ -46,7 +46,7 @@ func (r *{{.EntityName}}Repo) GetListByIDs(ctx context.Context, ids []int64) (en
 	return r.DBAL.GetListByIDs(ctx,ids)
 }
 
-func (r *{{.EntityName}}Repo) UpdateById(ctx context.Context, id int64, updates map[string]interface{}) error {
+func (r *{{.EntityName}}Repo) UpdateById(ctx context.Context, id int64, updates map[string]any) error {
 	return r.DBAL.UpdateById(ctx,id,updates)
 }
 
@@ -149,7 +149,7 @@ func (impl *{{.EntityName}}RepoDBAL) GetListByIDs(ctx context.Context, ids []int
 	return converter.To{{.EntityName}}List(_doList), nil
 }
 
-func (impl *{{.EntityName}}RepoDBAL) UpdateById(ctx context.Context, id int64, updates map[string]interface{}) error {
+func (impl *{{.EntityName}}RepoDBAL) UpdateById(ctx context.Context, id int64, updates map[string]any) error {
 	session := impl.NewReadSession(ctx)
 	session = session.Where("id = ?",id)
 	err := impl.Dao.Update(session, updates)

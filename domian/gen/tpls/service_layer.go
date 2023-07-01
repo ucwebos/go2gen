@@ -56,7 +56,7 @@ func (s *{{$.ServiceName}}) Get{{.EntityName}}(ctx context.Context, _{{.VarName}
 	return _{{.VarName}}, nil
 }
 
-func (s *{{$.ServiceName}}) Set{{.EntityName}}(ctx context.Context, {{.VarName}}Id int64, updateMap map[string]interface{}) (*entity.{{.EntityName}}, error) {
+func (s *{{$.ServiceName}}) Set{{.EntityName}}(ctx context.Context, {{.VarName}}Id int64, updateMap map[string]any) (*entity.{{.EntityName}}, error) {
 	setItems := dtx.SetItemList{}
 	for k, v := range updateMap {
 		setItems = append(setItems, &dtx.SetItem{

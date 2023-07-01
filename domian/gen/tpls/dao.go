@@ -48,7 +48,7 @@ func (dao *{{.DaoName}}) CreateBatch(db *gorm.DB, data do.{{.EntityListName}}) e
 	return nil
 }
 
-func (dao *{{.DaoName}}) Update(db *gorm.DB,updates map[string]interface{}) error {
+func (dao *{{.DaoName}}) Update(db *gorm.DB,updates map[string]any) error {
 	var err error = nil
 	db = db.Table({{.TableName}})
 	if db.Updates(updates).Error != nil {
@@ -65,7 +65,7 @@ func (dao *{{.DaoName}}) Delete(db *gorm.DB) error {
 	return nil
 }
 
-{{if .PkName}}func (dao *{{.DaoName}}) UpdateById(db *gorm.DB,updates map[string]interface{},id int64) error {
+{{if .PkName}}func (dao *{{.DaoName}}) UpdateById(db *gorm.DB,updates map[string]any,id int64) error {
 	var err error = nil
 	db = db.Table({{.TableName}}).Where("{{.PkCol}} = ?", id)
 	if db.Updates(updates).Error != nil {
@@ -74,7 +74,7 @@ func (dao *{{.DaoName}}) Delete(db *gorm.DB) error {
 	return nil
 }
 
-func (dao *{{.DaoName}}) UpdateByIdList(db *gorm.DB,updates map[string]interface{},idList []int64) error {
+func (dao *{{.DaoName}}) UpdateByIdList(db *gorm.DB,updates map[string]any,idList []int64) error {
 	var err error = nil
 	db = db.Table({{.TableName}}).Where("{{.PkCol}} in ?", idList)
 	if db.Updates(updates).Error != nil {
