@@ -1,6 +1,7 @@
 package app
 
 import (
+	"go2gen/conf"
 	"go2gen/domian/gen"
 	"go2gen/domian/parser"
 	"log"
@@ -69,6 +70,12 @@ func (a *App) Generate() error {
 	// GI
 	if err := a.BatchGI(); err != nil {
 		return err
+	}
+
+	// sql
+	dsn := conf.Global.DB
+	if dsn != "" {
+		gm.Do2Sql(dsn)
 	}
 
 	return nil

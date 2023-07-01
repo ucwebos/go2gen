@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	ProjectName string `yaml:"projectName"`
+	DB          string `yaml:"db"`
 	Tmpl        *Tmpl  `yaml:"tmpl"`
 }
 
@@ -22,6 +23,7 @@ var (
 		DoDir:       "{appPath}/internal/domain/repo/dbal/do",
 		ConvDoDir:   "{appPath}/internal/domain/repo/dbal/converter",
 		DaoDir:      "{appPath}/internal/domain/repo/dbal/dao",
+		SQLDir:      "{appPath}/internal/domain/repo/dbal/sql",
 		ServiceDir:  "{appPath}/internal/domain/service",
 		EntryDir:    "{appPath}/internal/entry",
 	}
@@ -29,13 +31,13 @@ var (
 
 func Init() {
 	di.PrintLog = false
-	cfg := config.Yaml{ConfigFile: "go2gen.yaml"}
+	cfg := config.Yaml{ConfigFile: ".go2gen.yaml"}
 	err := cfg.Apply(Global)
 	if err != nil {
 		log.Panic(err)
 	}
 	if Global.ProjectName == "" {
-		Global.ProjectName = "miman"
+		Global.ProjectName = "projectName"
 	}
 	if Global.Tmpl == nil {
 		Global.Tmpl = defaultTmpl

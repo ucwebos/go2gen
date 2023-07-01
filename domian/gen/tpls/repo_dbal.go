@@ -42,8 +42,8 @@ func (r *{{.EntityName}}Repo) GetByID(ctx context.Context, id int64) (*entity.{{
 	return r.DBAL.GetByID(ctx,id)
 }
 
-func (r *{{.EntityName}}Repo) GetListByIDs(ctx context.Context, id int64) (*entity.{{.EntityName}}, error) {
-	return r.DBAL.GetListByIDs(ctx,id)
+func (r *{{.EntityName}}Repo) GetListByIDs(ctx context.Context, ids []int64) (entity.{{.EntityName}}List, error) {
+	return r.DBAL.GetListByIDs(ctx,ids)
 }
 
 func (r *{{.EntityName}}Repo) UpdateById(ctx context.Context, id int64, updates map[string]interface{}) error {

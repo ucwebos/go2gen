@@ -16,6 +16,7 @@ type Tmpl struct {
 	RepoDbalDir string `json:"repo_dbal_dir" yaml:"repo_dbal_dir"`
 	ServiceDir  string `json:"service_dir" yaml:"service_dir"`
 	EntryDir    string `json:"entry_dir" yaml:"entry_dir"`
+	SQLDir      string `json:"sql_dir" yaml:"sql_dir"`
 }
 
 func (c *Config) GetRealTmpl(rootPath, appName string) *Tmpl {
@@ -30,6 +31,7 @@ func (c *Config) GetRealTmpl(rootPath, appName string) *Tmpl {
 		RepoDbalDir: replacePath(c.Tmpl.RepoDbalDir, rootPath, appName),
 		ServiceDir:  replacePath(c.Tmpl.ServiceDir, rootPath, appName),
 		EntryDir:    replacePath(c.Tmpl.EntryDir, rootPath, appName),
+		SQLDir:      replacePath(c.Tmpl.SQLDir, rootPath, appName),
 	}
 }
 

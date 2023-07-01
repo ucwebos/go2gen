@@ -25,11 +25,7 @@ func generated(r *gin.Engine) {
 		{{- range $v := $it.FuncList}}
 		// {{$v.Name}}
 		r.POST("/{{$.Entry}}/{{$it.Key}}/{{$v.KeyLi}}", func(ctx *gin.Context) {
-			_raw, err := commonVerify(ctx)
-			if err != nil {
-				common.JSONError(ctx, err.(common.ErrCode))
-				return
-			}
+			_raw := types.GetParamsRaw(ctx)
 			{{- if ne $v.Request nil}}
 			var req = &types.{{$v.Request.Name}}{}
 			if err := common.BindBody(_raw, &req); err != nil {
