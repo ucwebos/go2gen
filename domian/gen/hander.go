@@ -7,6 +7,7 @@ import (
 	"go2gen/conf"
 	"go2gen/domian/gen/tpls"
 	"go2gen/domian/parser"
+	"go2gen/utils"
 	"log"
 	"os"
 	"strings"
@@ -189,13 +190,15 @@ func (m *Manager) docsItem(entry, moduleKey, dir string, f *parser.EntryModuleFu
 	return
 }
 
-func (m *Manager) getJSON(fields map[string]parser.XField, structList map[string]parser.XST) map[string]interface{} {
+func (m *Manager) getJSON(fields map[string]parser.XField, structList map[string]parser.XST) *utils.OrderMap {
 	body := make(map[string]interface{})
 	for _, it := range fields {
 		j := it.GetTag("json")
 		body[j.Name] = m.getJSONVal(it, structList)
 	}
-	return body
+	om := utils.NewOrderMap(utils.DefaultOrderMapKeySort)
+	_ = om.LoadStringMap(body)
+	return om
 }
 
 func (m *Manager) getJSONVal(field parser.XField, structList map[string]parser.XST) interface{} {
