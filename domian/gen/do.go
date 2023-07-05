@@ -82,7 +82,7 @@ func (m *Manager) Do(xst parser.XST) ([]byte, []byte, error) {
 					tag = strings.Replace(tag, tagConv, "", 1)
 				}
 			}
-			tags := fmt.Sprintf("`db:\"%s\" gorm:\"%s\"`", tagDesc.Name, tag)
+			tags := fmt.Sprintf("`db:\"%s\" gorm:\"column:%s\"`", tagDesc.Name, tag)
 			fType := field.Type
 			switch field.SType {
 			case 1:
