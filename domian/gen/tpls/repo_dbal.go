@@ -50,6 +50,10 @@ func (r *{{.EntityName}}Repo) UpdateById(ctx context.Context, id int64, updates 
 	return r.DBAL.UpdateById(ctx,id,updates)
 }
 
+func (r *{{.EntityName}}Repo) UpdateByIds(ctx context.Context, ids []int64, updates map[string]any) error {
+	return r.DBAL.UpdateByIds(ctx,ids,updates)
+}
+
 func (r *{{.EntityName}}Repo) DeleteById(ctx context.Context, id int64) error {
 	return r.DBAL.DeleteById(ctx,id)
 }
@@ -152,6 +156,16 @@ func (impl *{{.EntityName}}RepoDBAL) GetListByIDs(ctx context.Context, ids []int
 func (impl *{{.EntityName}}RepoDBAL) UpdateById(ctx context.Context, id int64, updates map[string]any) error {
 	session := impl.NewReadSession(ctx)
 	session = session.Where("id = ?",id)
+	err := impl.Dao.Update(session, updates)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (impl *{{.EntityName}}RepoDBAL) UpdateByIds(ctx context.Context, ids []int64, updates map[string]any) error {
+	session := impl.NewReadSession(ctx)
+	session = session.Where("id in ?",ids)
 	err := impl.Dao.Update(session, updates)
 	if err != nil {
 		return err
