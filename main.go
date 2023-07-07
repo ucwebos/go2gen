@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"go2gen/conf"
-	"go2gen/handler"
+	"github.com/ucwebos/go2gen/conf"
+	"github.com/ucwebos/go2gen/handler"
 )
 
 var rootCmd = &cobra.Command{

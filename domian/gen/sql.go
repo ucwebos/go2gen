@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"go2gen/domian/gen/tpls"
-	"go2gen/domian/parser"
-	"go2gen/utils"
+	"github.com/ucwebos/go2gen/domian/gen/tpls"
+	"github.com/ucwebos/go2gen/domian/parser"
+	"github.com/ucwebos/go2gen/utils"
 
 	"github.com/xbitgo/core/tools/tool_file"
 )

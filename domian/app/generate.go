@@ -1,9 +1,9 @@
 package app
 
 import (
-	"go2gen/conf"
-	"go2gen/domian/gen"
-	"go2gen/domian/parser"
+	"github.com/ucwebos/go2gen/conf"
+	"github.com/ucwebos/go2gen/domian/gen"
+	"github.com/ucwebos/go2gen/domian/parser"
 	"log"
 )
 

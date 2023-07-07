@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/spf13/cobra"
-	"go2gen/domian/project"
+	"github.com/ucwebos/go2gen/domian/project"
 	"log"
 	"os"
 )

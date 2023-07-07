@@ -1,7 +1,7 @@
 package gen
 
 import (
-	"go2gen/conf"
+	"github.com/ucwebos/go2gen/conf"
 	"log"
 	"os"
 	"reflect"

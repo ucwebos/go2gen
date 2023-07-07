@@ -2,7 +2,7 @@ package tpls
 
 import (
 	"bytes"
-	"go2gen/domian/parser"
+	"github.com/ucwebos/go2gen/domian/parser"
 	"text/template"
 )
 

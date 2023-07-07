@@ -1,4 +1,4 @@
-module go2gen
+module github.com/ucwebos/go2gen
 
 go 1.18
 

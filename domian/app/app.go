@@ -2,8 +2,8 @@ package app
 
 import (
 	"fmt"
-	"go2gen/conf"
-	"go2gen/domian/gen"
+	"github.com/ucwebos/go2gen/conf"
+	"github.com/ucwebos/go2gen/domian/gen"
 	"os"
 )
 

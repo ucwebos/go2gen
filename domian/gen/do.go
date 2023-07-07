@@ -2,7 +2,7 @@ package gen
 
 import (
 	"fmt"
-	"go2gen/conf"
+	"github.com/ucwebos/go2gen/conf"
 	"log"
 	"sort"
 	"strings"
@@ -10,8 +10,8 @@ import (
 	"github.com/xbitgo/core/tools/tool_file"
 	"github.com/xbitgo/core/tools/tool_str"
 
-	"go2gen/domian/gen/tpls"
-	"go2gen/domian/parser"
+	"github.com/ucwebos/go2gen/domian/gen/tpls"
+	"github.com/ucwebos/go2gen/domian/parser"
 )
 
 func (m *Manager) DoList(xsts map[string]parser.XST) {

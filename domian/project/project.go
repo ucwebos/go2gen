@@ -1,10 +1,10 @@
 package project
 
 import (
+	"github.com/ucwebos/go2gen/conf"
+	"github.com/ucwebos/go2gen/domian/app"
+	"github.com/ucwebos/go2gen/domian/gen"
 	"github.com/xbitgo/core/di"
-	"go2gen/conf"
-	"go2gen/domian/app"
-	"go2gen/domian/gen"
 	"log"
 )
 

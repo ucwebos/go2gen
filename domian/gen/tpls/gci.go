@@ -2,8 +2,8 @@ package tpls
 
 import (
 	"bytes"
+	"github.com/ucwebos/go2gen/domian/parser"
 	"github.com/xbitgo/core/tools/tool_str"
-	"go2gen/domian/parser"
 	"strings"
 	"text/template"
 )

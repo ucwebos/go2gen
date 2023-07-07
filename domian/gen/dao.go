@@ -2,13 +2,13 @@ package gen
 
 import (
 	"fmt"
-	"go2gen/conf"
+	"github.com/ucwebos/go2gen/conf"
 	"log"
 	"strings"
 
+	"github.com/ucwebos/go2gen/domian/gen/tpls"
+	"github.com/ucwebos/go2gen/domian/parser"
 	"github.com/xbitgo/core/tools/tool_file"
-	"go2gen/domian/gen/tpls"
-	"go2gen/domian/parser"
 )
 
 func (m *Manager) Dao() error {
