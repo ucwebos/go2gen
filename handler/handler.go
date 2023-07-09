@@ -18,6 +18,12 @@ func CmdList() []*cobra.Command {
 			Run:   generate,
 		},
 		{
+			Use:   "sql",
+			Short: "生成接口单元测试用例",
+			Long:  "生成接口单元测试用例; 参数 {app}; app为应用名称 必须",
+			Run:   sql,
+		},
+		{
 			Use:   "tests",
 			Short: "生成接口单元测试用例",
 			Long:  "生成接口单元测试用例; 参数 {app}; app为应用名称 必须",
@@ -33,6 +39,15 @@ func generate(cmd *cobra.Command, args []string) {
 		log.Fatalf("请输入正确的应用名! ")
 	}
 	p.Generate()
+}
+
+func sql(cmd *cobra.Command, args []string) {
+	p := project.NewProject(pwd)
+	num := p.SetActiveApps(args...)
+	if num == 0 {
+		log.Fatalf("请输入正确的应用名! ")
+	}
+	p.Do2SQL()
 }
 
 func tests(cmd *cobra.Command, args []string) {

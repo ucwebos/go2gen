@@ -73,10 +73,10 @@ func (a *App) Generate() error {
 	}
 
 	// sql
-	dsn := conf.Global.DB
-	if dsn != "" {
-		gm.Do2Sql(dsn)
-	}
+	//dsn := conf.Global.DB
+	//if dsn != "" {
+	//	gm.Do2Sql(dsn)
+	//}
 
 	return nil
 }
@@ -125,4 +125,12 @@ func (a *App) BatchGI() error {
 		}
 	}
 	return nil
+}
+
+func (a *App) Do2SQL() {
+	gm := gen.NewManager(a.Tmpl, a.Name, a.Pwd)
+	dsn := conf.Global.DB
+	if dsn != "" {
+		gm.Do2Sql(dsn)
+	}
 }

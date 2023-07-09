@@ -53,6 +53,12 @@ func (p *Project) Generate() {
 	}
 }
 
+func (p *Project) Do2SQL() {
+	for _, actApp := range p.activeApps {
+		actApp.Do2SQL()
+	}
+}
+
 // CRepo 生成
 func (p *Project) CRepo(entity string) {
 	for _, actApp := range p.activeApps {
