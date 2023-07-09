@@ -64,11 +64,11 @@ func From{{.Name}}Entity(input *entity.{{.Name}}) *do.{{.Name}}Do{
 	{{- if eq .SType 1}} 
 		{{- if .IsPoint}} 
 	if input.{{.Name}} != nil {
-		b, _ := json.Marshal(input.{{.Name}})
+		b, _ := tools.JSON.Marshal(input.{{.Name}})
 		output.{{.Name}} = string(b)
 	}
 		{{- else}}
-	b, _ := json.Marshal(input.{{.Name}})
+	b, _ := tools.JSON.Marshal(input.{{.Name}})
 	output.{{.Name}} = string(b)
 		{{- end}}
 	
@@ -77,13 +77,13 @@ func From{{.Name}}Entity(input *entity.{{.Name}}) *do.{{.Name}}Do{
 		{{- if .ConvSlice}}
 			output.{{.Name}} = slice_utils.Implode(input.{{.Name}},",")
 		{{- else}}
-		b, _ := json.Marshal(input.{{.Name}})
+		b, _ := tools.JSON.Marshal(input.{{.Name}})
 		output.{{.Name}} = string(b)
 		{{- end}}
 	}
 	{{- else if eq .SType 3}}
 	if input.{{.Name}} != nil {
-		b, _ := json.Marshal(input.{{.Name}})
+		b, _ := tools.JSON.Marshal(input.{{.Name}})
 		output.{{.Name}} = string(b)
 	}
 	{{- else if eq .SType 4}}
@@ -110,9 +110,9 @@ func To{{.Name}}Entity(input *do.{{.Name}}Do) *entity.{{.Name}}{
 		{{- else}}
 		t := entity.{{ .Type2}}{}
 		{{- end}}
-		err := json.Unmarshal([]byte(input.{{.Name}}), &t)
+		err := tools.JSON.Unmarshal([]byte(input.{{.Name}}), &t)
 		if err != nil {
-			logx.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
+			log.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
 		} else {
 			output.{{.Name}} = t
 		}
@@ -129,9 +129,9 @@ func To{{.Name}}Entity(input *do.{{.Name}}Do) *entity.{{.Name}}{
 				{{- end}}
 			{{- else}}
 				t := {{.Type}}{}
-				err := json.Unmarshal([]byte(input.{{.Name}}), &t)
+				err := tools.JSON.Unmarshal([]byte(input.{{.Name}}), &t)
 				if err != nil {
-					logx.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
+					log.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
 				} else {
 					output.{{.Name}} = t
 				}
@@ -140,9 +140,9 @@ func To{{.Name}}Entity(input *do.{{.Name}}Do) *entity.{{.Name}}{
 	{{- else if eq .SType 3}}
 		if input.{{.Name}} != "" {
 			t := {{.Type}}{}
-			err := json.Unmarshal([]byte(input.{{.Name}}), &t)
+			err := tools.JSON.Unmarshal([]byte(input.{{.Name}}), &t)
 			if err != nil {
-				logx.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
+				log.Errorf("converter To{{$.Name}}Entity[{{.Name}}] err %v", err)
 			} else {
 				output.{{.Name}} = t
 			}

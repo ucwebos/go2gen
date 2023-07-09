@@ -42,7 +42,8 @@ func (m *Manager) DoList(xsts map[string]parser.XST) {
 
 	filename2 := fmt.Sprintf("%s/do_converter_gen.go", m.Tmpl.ConvDoDir)
 	bufH = m.GenFileHeader("converter", []string{
-		"github.com/zeromicro/go-zero/core/logx",
+		fmt.Sprintf("%s/common/tools", conf.Global.ProjectName),
+		fmt.Sprintf("%s/common/core/log", conf.Global.ProjectName),
 		fmt.Sprintf("%s/common/tools/tool_time", conf.Global.ProjectName),
 		fmt.Sprintf("%s/%s/internal/domain/entity", conf.Global.ProjectName, m.AppName),
 		fmt.Sprintf("%s/%s/internal/domain/repo/dbal/do", conf.Global.ProjectName, m.AppName),
