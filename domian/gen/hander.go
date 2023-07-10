@@ -240,7 +240,7 @@ func (m *Manager) toDocsItemFields(fields map[string]parser.XField, structList m
 	request := make([]tpls.DocsItemField, 0)
 	for _, field := range _fields {
 		j := field.GetTag("json")
-		name := prefix + j.Name
+		name := prefix + strings.ReplaceAll(j.Name, ",omitempty", "")
 		_type := field.Type
 		switch field.SType {
 		case parser.STypeStruct:
