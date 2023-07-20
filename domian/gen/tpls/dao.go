@@ -40,6 +40,15 @@ func (dao *{{.DaoName}}) Create(db *gorm.DB, data *do.{{.EntityName}}) error {
 	return nil
 }
 
+func (dao *{{.DaoName}}) Save(db *gorm.DB, data *do.{{.EntityName}}) error {
+	err := db.Table({{.TableName}}).Save(data).Error
+	if err != nil {
+		return errors.Wrapf(err, "{{.DaoName}} Save failed")
+	}
+	return nil
+}
+
+
 func (dao *{{.DaoName}}) CreateBatch(db *gorm.DB, data do.{{.EntityListName}}) error {
 	err := db.Table({{.TableName}}).CreateInBatches(data, len(data)).Error
 	if err != nil {
