@@ -6,7 +6,7 @@ import (
 	"text/template"
 )
 
-const RoutesTpl = `package api
+const RoutesTpl = `package {{.Entry}}
 
 import (
 	"github.com/gin-gonic/gin"
