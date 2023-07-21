@@ -19,34 +19,31 @@ import (
 
 func generated(r *gin.Engine) {
 	{{range $it := .ModuleList}}
-	// {{$it.Name}}
-	r.Use({{range $it.Middleware}}middleware.{{.}}(){{end}})
-	{
-		{{- range $v := $it.FuncList}}
-		// {{$v.Name}}
-		r.POST("/{{$.Entry}}/{{$it.Key}}/{{$v.KeyLi}}", func(ctx *gin.Context) {
-			_raw := types.GetParamsRaw(ctx)
-			{{- if ne $v.Request nil}}
-			var req = &types.{{$v.Request.Name}}{}
-			if err := common.BindBody(_raw, &req); err != nil {
-				common.JSONError(ctx, common.ErrParams)
-				return
-			}
-			{{- if ne $v.Response nil}}
-			res, err := handler.{{$v.Key}}(ctx, req)
-			common.JSON(ctx, res, err)
-			{{- else}}
-			err := handler.{{$v.Key}}(ctx, req)
-			common.JSON(ctx, nil, err)
-			{{- end}}
-			{{- else}}
-			res, err := handler.{{$v.Key}}(ctx)
-			common.JSON(ctx, res, err)
-			{{- end}}
-		})
-
+	// ---------- {{$it.Name}} ----------
+	{{- range $v := $it.FuncList}}
+	// {{$v.Name}}
+	r.POST("/{{$.Entry}}/{{$it.Key}}/{{$v.KeyLi}}"{{with $it.Middleware}},{{range $it.Middleware}}middleware.{{.}}(){{end}}{{end}}, func(ctx *gin.Context) {
+		_raw := types.GetParamsRaw(ctx)
+		{{- if ne $v.Request nil}}
+		var req = &types.{{$v.Request.Name}}{}
+		if err := common.BindBody(_raw, &req); err != nil {
+			common.JSONError(ctx, common.ErrParams)
+			return
+		}
+		{{- if ne $v.Response nil}}
+		res, err := handler.{{$v.Key}}(ctx, req)
+		common.JSON(ctx, res, err)
+		{{- else}}
+		err := handler.{{$v.Key}}(ctx, req)
+		common.JSON(ctx, nil, err)
 		{{- end}}
-	}
+		{{- else}}
+		res, err := handler.{{$v.Key}}(ctx)
+		common.JSON(ctx, res, err)
+		{{- end}}
+	})
+
+	{{- end}}
 	{{end}}
 }
 `
