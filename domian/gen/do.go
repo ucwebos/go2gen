@@ -58,8 +58,12 @@ func (m *Manager) DoList(xsts map[string]parser.XST) {
 
 func (m *Manager) Do(xst parser.XST) ([]byte, []byte, error) {
 	gdo := tpls.Do{
-		Name:   xst.Name,
-		Fields: make([]tpls.DoField, 0),
+		Name:     xst.Name,
+		Fields:   make([]tpls.DoField, 0),
+		DeleteAT: true,
+	}
+	if xst.NoDeleteAT {
+		gdo.DeleteAT = false
 	}
 	fieldList := make([]parser.XField, 0)
 	for _, field := range xst.FieldList {

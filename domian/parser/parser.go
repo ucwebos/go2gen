@@ -49,17 +49,18 @@ func (x INF) Equal(x2 INF) bool {
 }
 
 type XST struct {
-	GIName    string // 自定义DI名
-	GI        bool   // 是否注册DI
-	ImplINF   string // 标注实现接口
-	Imports   []string
-	File      string             // 所在文件
-	Name      string             // 结构体名称
-	ShortName string             // 结构体定义方法时的引用名称
-	MPoint    bool               // 是否是使用指针定义方法
-	CST       []string           // 子结构体
-	Methods   map[string]XMethod // 方法列表
-	FieldList map[string]XField  // 字段列表
+	GIName     string // 自定义DI名
+	GI         bool   // 是否注册DI
+	NoDeleteAT bool
+	ImplINF    string // 标注实现接口
+	Imports    []string
+	File       string             // 所在文件
+	Name       string             // 结构体名称
+	ShortName  string             // 结构体定义方法时的引用名称
+	MPoint     bool               // 是否是使用指针定义方法
+	CST        []string           // 子结构体
+	Methods    map[string]XMethod // 方法列表
+	FieldList  map[string]XField  // 字段列表
 }
 
 type XSTChanges struct {

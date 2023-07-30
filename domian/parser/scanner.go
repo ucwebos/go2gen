@@ -218,10 +218,11 @@ func (ips *IParser) ParseFile(pwd string) error {
 					ips.EntryModules = append(ips.EntryModules, module)
 				} else {
 					var (
-						used    = true
-						ImplINF = ""
-						GIName  = ""
-						GI      = false
+						used       = true
+						ImplINF    = ""
+						GIName     = ""
+						GI         = false
+						noDeleteAT = false
 					)
 					if x.Doc != nil && len(x.Doc.List) >= 0 {
 						for _, comment := range x.Doc.List {
@@ -233,6 +234,9 @@ func (ips *IParser) ParseFile(pwd string) error {
 								if len(r) > 1 {
 									ImplINF = r[1]
 								}
+							}
+							if strings.Index(comment.Text, "@NODELETEAT") > 0 {
+								noDeleteAT = true
 							}
 							if strings.Contains(comment.Text, "@GI") {
 								GI = true
@@ -265,15 +269,16 @@ func (ips *IParser) ParseFile(pwd string) error {
 							ips.INFList[name] = inf
 						case *ast.StructType:
 							xst := XST{
-								GIName:    GIName,
-								GI:        GI,
-								ImplINF:   ImplINF,
-								Imports:   imports,
-								File:      pwd,
-								Name:      name,
-								CST:       make([]string, 0),
-								Methods:   make(map[string]XMethod, 0),
-								FieldList: make(map[string]XField, 0),
+								GIName:     GIName,
+								GI:         GI,
+								NoDeleteAT: noDeleteAT,
+								ImplINF:    ImplINF,
+								Imports:    imports,
+								File:       pwd,
+								Name:       name,
+								CST:        make([]string, 0),
+								Methods:    make(map[string]XMethod, 0),
+								FieldList:  make(map[string]XField, 0),
 							}
 							fields, child := getStructField(xt)
 							xst.CST = child

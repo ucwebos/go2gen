@@ -16,7 +16,9 @@ type {{.Name}}Do struct {
 	{{.Name}} {{.Type}} {{.Tag}} // {{.Comment}}
 	{{- end}}
 {{- end}}
+	{{- if .DeleteAT}}
 	DeletedAt gorm.DeletedAt ` + "`" + `db:"deleted_at" gorm:"column:deleted_at"` + "`" + ` // 软删除标识
+	{{- end}}
 }
 
 func (do *{{.Name}}Do) TableName() string {
@@ -25,8 +27,9 @@ func (do *{{.Name}}Do) TableName() string {
 `
 
 type Do struct {
-	Name   string
-	Fields []DoField
+	Name     string
+	Fields   []DoField
+	DeleteAT bool
 }
 
 type DoField struct {
