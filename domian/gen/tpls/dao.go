@@ -90,6 +90,23 @@ func (dao *{{.DaoName}}) Update(db *gorm.DB,updates map[string]any) error {
 	return nil
 }
 
+func (dao *{{.DaoName}}) QueryUpdate(db *gorm.DB, query filterx.FilteringList, updates map[string]any) error {
+	var err error = nil
+	db = db.Table(do.TableNameUserEquipmentFixLogDo)
+	db, err = query.GormOption(db)
+	if err != nil {
+		return err
+	}
+	db = db.Updates(updates)
+	if db.Error != nil {
+		return errors.Wrapf(err, "{{.DaoName}} Update failed")
+	}
+	if db.RowsAffected <= 0 {
+		return errors.Wrapf(err, "{{.DaoName}} Update failed")
+	}
+	return nil
+}
+
 func (dao *{{.DaoName}}) Delete(db *gorm.DB) error {
 	var err error = nil
 	if db.Delete(&do.{{.EntityName}}{}).Error != nil {
