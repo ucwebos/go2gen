@@ -40,6 +40,30 @@ func (dao *{{.DaoName}}) Create(db *gorm.DB, data *do.{{.EntityName}}) error {
 	return nil
 }
 
+func (dao *{{.DaoName}}) Transaction(db *gorm.DB, executeFunc func(tx *gorm.DB) error) (err error) {
+	tx := db.Begin()
+	defer func() {
+		if errRecover := recover(); errRecover != nil {
+			err = errors.New(fmt.Sprintf("Recover Error %v", errRecover))
+			tx.Rollback()
+			return
+		}
+	}()
+	err = executeFunc(tx)
+	if err != nil {
+		err = errors.Wrap(err, "Execute Error")
+		tx.Rollback()
+		return
+	}
+	err = tx.Commit().Error
+	if err != nil {
+		err = errors.Wrap(err, "Commit Error")
+		tx.Rollback()
+		return
+	}
+	return
+}
+
 func (dao *{{.DaoName}}) Save(db *gorm.DB, data *do.{{.EntityName}}) error {
 	err := db.Table({{.TableName}}).Save(data).Error
 	if err != nil {
