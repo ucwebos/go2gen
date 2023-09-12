@@ -142,7 +142,7 @@ func (impl *{{.EntityName}}RepoDBAL) QueryOne(ctx context.Context, query filterx
 	if err != nil {
 		return nil, err
 	}
-	return converter.ToUserEquipmentFixLogEntity(_do), nil
+	return converter.To{{.EntityName}}Entity(_do), nil
 }
 
 func (impl *{{.EntityName}}RepoDBAL) Create(ctx context.Context, input *entity.{{.EntityName}}) (*entity.{{.EntityName}}, error) {
