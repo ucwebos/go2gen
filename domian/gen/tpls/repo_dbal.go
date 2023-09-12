@@ -32,10 +32,17 @@ func (r *{{.EntityName}}Repo) Query(ctx context.Context, query filterx.Filtering
 	return r.DBAL.Query(ctx,query,pg)
 }
 
+func (r *{{.EntityName}}Repo) QueryOne(ctx context.Context, query filterx.FilteringList) (*entity.{{.EntityName}}, error) {
+	return r.DBAL.QueryOne(ctx, query)
+}
+
 func (r *{{.EntityName}}Repo) Create(ctx context.Context, input *entity.{{.EntityName}}) (*entity.{{.EntityName}}, error) {
 	return r.DBAL.Create(ctx,input)
 }
 
+func (r *{{.EntityName}}Repo) Transaction(ctx context.Context, executeFunc func(tx *gorm.DB) error) error {
+	return r.DBAL.Transaction(ctx, executeFunc)
+}
 
 {{- if .HasID}}
 func (r *{{.EntityName}}Repo) GetByID(ctx context.Context, id int64) (*entity.{{.EntityName}}, error) {
@@ -52,6 +59,10 @@ func (r *{{.EntityName}}Repo) UpdateById(ctx context.Context, id int64, updates 
 
 func (r *{{.EntityName}}Repo) UpdateByIds(ctx context.Context, ids []int64, updates map[string]any) error {
 	return r.DBAL.UpdateByIds(ctx,ids,updates)
+}
+
+func (r *{{.EntityName}}Repo) QueryUpdate(ctx context.Context, query filterx.FilteringList, updates map[string]any) error {
+	return r.DBAL.QueryUpdate(ctx, query, updates)
 }
 
 func (r *{{.EntityName}}Repo) DeleteById(ctx context.Context, id int64) error {
@@ -121,6 +132,19 @@ func (impl *{{.EntityName}}RepoDBAL) Query(ctx context.Context, query filterx.Fi
 	return converter.To{{.EntityName}}List(doList), count, nil
 }
 
+func (impl *{{.EntityName}}RepoDBAL) QueryOne(ctx context.Context, query filterx.FilteringList) (*entity.{{.EntityName}}, error) {
+	session := impl.NewReadSession(ctx)
+	session, err := query.GormOption(session)
+	if err != nil {
+		return nil, err
+	}
+	_do, err := impl.Dao.Get(session)
+	if err != nil {
+		return nil, err
+	}
+	return converter.To{{.EntityName}}Entity(_do), nil
+}
+
 func (impl *{{.EntityName}}RepoDBAL) Create(ctx context.Context, input *entity.{{.EntityName}}) (*entity.{{.EntityName}}, error) {
 	session := impl.NewCreateSession(ctx)
 	_do := converter.From{{.EntityName}}Entity(input)
@@ -130,6 +154,15 @@ func (impl *{{.EntityName}}RepoDBAL) Create(ctx context.Context, input *entity.{
 	}
 	output := converter.To{{.EntityName}}Entity(_do)
 	return output, err
+}
+
+func (impl *{{.EntityName}}RepoDBAL) Transaction(ctx context.Context, executeFunc func(tx *gorm.DB) error) (err error) {
+	session := impl.NewCreateSession(ctx)
+	err = impl.Dao.Transaction(session, executeFunc)
+	if err != nil {
+		return err
+	}
+	return err
 }
 
 {{- if .HasID}}
@@ -167,6 +200,19 @@ func (impl *{{.EntityName}}RepoDBAL) UpdateByIds(ctx context.Context, ids []int6
 	session := impl.NewReadSession(ctx)
 	session = session.Where("id in ?",ids)
 	err := impl.Dao.Update(session, updates)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (impl *{{.EntityName}}RepoDBAL) QueryUpdate(ctx context.Context, query filterx.FilteringList, updates map[string]any) error {
+	session := impl.NewReadSession(ctx)
+	session, err := query.GormOption(session)
+	if err != nil {
+		return err
+	}
+	err = impl.Dao.Update(session, updates)
 	if err != nil {
 		return err
 	}

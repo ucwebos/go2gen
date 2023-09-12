@@ -13,6 +13,10 @@ func New{{.DaoName}}() *{{.DaoName}} {
   return &{{.DaoName}}{}
 }
 
+func (dao *{{.DaoName}}) Gorm(db *gorm.DB) *gorm.DB {
+	return db.Table({{.TableName}})
+}
+
 {{if .PkName}}func (dao *{{.DaoName}}) GetById(db *gorm.DB, id {{.PkType}}) (*do.{{.EntityName}}, error) {
 	result := &do.{{.EntityName}}{}
 	err := db.Table({{.TableName}}).Where("{{.PkCol}} = ?", id).First(result).Error
@@ -38,6 +42,30 @@ func (dao *{{.DaoName}}) Create(db *gorm.DB, data *do.{{.EntityName}}) error {
 		return errors.Wrapf(err, "{{.DaoName}} Create failed")
 	}
 	return nil
+}
+
+func (dao *{{.DaoName}}) Transaction(db *gorm.DB, executeFunc func(tx *gorm.DB) error) (err error) {
+	tx := db.Begin()
+	defer func() {
+		if errRecover := recover(); errRecover != nil {
+			err = errors.New(fmt.Sprintf("Recover Error %v", errRecover))
+			tx.Rollback()
+			return
+		}
+	}()
+	err = executeFunc(tx)
+	if err != nil {
+		err = errors.Wrap(err, "Execute Error")
+		tx.Rollback()
+		return
+	}
+	err = tx.Commit().Error
+	if err != nil {
+		err = errors.Wrap(err, "Commit Error")
+		tx.Rollback()
+		return
+	}
+	return
 }
 
 func (dao *{{.DaoName}}) Save(db *gorm.DB, data *do.{{.EntityName}}) error {
