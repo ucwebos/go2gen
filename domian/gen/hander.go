@@ -151,6 +151,9 @@ func (m *Manager) docs(entry string, modules []parser.EntryModule) error {
 		Modules: modules,
 	}
 	buf, err := t.Execute()
+	if siderStr == "" {
+		return nil
+	}
 	_str := siderStr[:idx1+3] + string(buf) + siderStr[idx2:]
 	tool_file.WriteFile(filename, []byte(_str))
 	return nil
@@ -175,8 +178,12 @@ func (m *Manager) docsItem(entry, moduleKey, dir string, f *parser.EntryModuleFu
 		ExpJSON:   []byte{},
 	}
 	if f.Response != nil {
+
+		//fmt.Printf("%v \n", structList)
+
 		body := m.getJSON(f.Response.XST.FieldList, structList)
 		sb, _ := jsoniter.MarshalIndent(body, "", "  ")
+
 		t.ExpJSON = append(t.ExpJSON, []byte("```\n")...)
 		t.ExpJSON = append(t.ExpJSON, sb...)
 		t.ExpJSON = append(t.ExpJSON, []byte("\n```")...)
@@ -194,7 +201,9 @@ func (m *Manager) getJSON(fields map[string]parser.XField, structList map[string
 	body := make(map[string]interface{})
 	for _, it := range fields {
 		j := it.GetTag("json")
-		body[j.Name] = m.getJSONVal(it, structList)
+		if j != nil {
+			body[j.Name] = m.getJSONVal(it, structList)
+		}
 	}
 	om := utils.NewOrderMap(utils.DefaultOrderMapKeySort)
 	_ = om.LoadStringMap(body)
@@ -240,7 +249,10 @@ func (m *Manager) toDocsItemFields(fields map[string]parser.XField, structList m
 	request := make([]tpls.DocsItemField, 0)
 	for _, field := range _fields {
 		j := field.GetTag("json")
-		name := prefix + strings.ReplaceAll(j.Name, ",omitempty", "")
+		name := ""
+		if j != nil {
+			name = prefix + strings.ReplaceAll(j.Name, ",omitempty", "")
+		}
 		_type := field.Type
 		switch field.SType {
 		case parser.STypeStruct:

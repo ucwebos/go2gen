@@ -68,8 +68,15 @@ func (m *Manager) IO(xst parser.XST, tagName string) ([]byte, []byte, error) {
 		tagJSON := field.GetTag("json")
 		tagIO := field.GetTag(tagName)
 		tags := ""
+
+		if tagJSON == nil {
+			continue
+		}
 		if tagJSON != nil {
 			tags = fmt.Sprintf("`json:\"%s\"`", tagJSON.Name)
+			if tagJSON.Name == "-" {
+				tags = ""
+			}
 		}
 		if tagIO != nil {
 			if tagIO.Txt == "-" {
@@ -129,16 +136,15 @@ func (m *Manager) IO(xst parser.XST, tagName string) ([]byte, []byte, error) {
 }
 
 func (m *Manager) ioConv(xst parser.XST, gio tpls.IO) ([]byte, error) {
+	for idx, item := range gio.Fields {
+		if item.Name == "" {
+			gio.Fields[idx].Name = item.Type2
+		}
+	}
 	convGen := tpls.IoConv{
 		Name:   gio.Name,
 		Fields: gio.Fields,
 	}
-	for idx, item := range gio.Fields {
-		if item.Name == "" {
-			convGen.Fields[idx].Name = item.Type2
-		}
-	}
-
 	buf, err := convGen.Execute()
 	if err != nil {
 		return nil, err
