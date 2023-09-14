@@ -178,9 +178,6 @@ func (m *Manager) docsItem(entry, moduleKey, dir string, f *parser.EntryModuleFu
 		ExpJSON:   []byte{},
 	}
 	if f.Response != nil {
-
-		//fmt.Printf("%v \n", structList)
-
 		body := m.getJSON(f.Response.XST.FieldList, structList)
 		sb, _ := jsoniter.MarshalIndent(body, "", "  ")
 
