@@ -528,13 +528,15 @@ func getStructField(xType *ast.StructType) (fields map[string]XField, child []st
 		if fe.Type == nil {
 			continue
 		}
-		if fe.Names != nil && len(fe.Names) > 0 {
-			name := fe.Names[0].Name
-			if unicode.IsLower([]rune(name)[0]) {
-				continue
+		if (fe.Names != nil && len(fe.Names) > 0) || fe.Type != nil {
+			name := ""
+			if len(fe.Names) > 0 {
+				name = fe.Names[0].Name
+				if unicode.IsLower([]rune(name)[0]) {
+					continue
+				}
 			}
 			fType, sType := getTypeStr(fe.Type)
-
 			xf := XField{
 				Name:  name,
 				Type:  fType,
