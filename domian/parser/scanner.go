@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 	"unicode"
 
@@ -212,8 +213,15 @@ func (ips *IParser) ParseFile(pwd string) error {
 						}
 					}
 
-					for _, moduleFunc := range tmpFuncs {
-						module.FuncList = append(module.FuncList, moduleFunc)
+					//排序
+					keys := make([]string, 0, len(tmpFuncs))
+					for k := range tmpFuncs {
+						keys = append(keys, k)
+					}
+					sort.Strings(keys)
+					////顺序遍历
+					for _, k := range keys {
+						module.FuncList = append(module.FuncList, tmpFuncs[k])
 					}
 					ips.EntryModules = append(ips.EntryModules, module)
 				} else {
