@@ -19,7 +19,16 @@ func (m *Manager) IOEntries(xsts map[string]parser.XST, entry string) {
 		buf2 = []byte{}
 	)
 
-	for _, xst := range xsts {
+	//排序
+	keys := make([]string, 0, len(xsts))
+	for k := range xsts {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	//顺序遍历
+	for _, k := range keys {
+		xst := xsts[k]
 		b1, b2, err := m.IO(xst, entry)
 		if err != nil {
 			log.Panicf("gen io err: %v \n", err)
@@ -58,7 +67,15 @@ func (m *Manager) IO(xst parser.XST, tagName string) ([]byte, []byte, error) {
 		Fields: make([]tpls.IoField, 0),
 	}
 	fieldList := make([]parser.XField, 0)
-	for _, field := range xst.FieldList {
+	//排序
+	keys := make([]string, 0, len(xst.FieldList))
+	for k := range xst.FieldList {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	//顺序遍历
+	for _, k := range keys {
+		field := xst.FieldList[k]
 		fieldList = append(fieldList, field)
 	}
 	sort.SliceStable(fieldList, func(i, j int) bool {

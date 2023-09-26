@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ucwebos/go2gen/conf"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/ucwebos/go2gen/domian/gen/tpls"
@@ -17,7 +18,16 @@ func (m *Manager) Dao() error {
 		log.Fatalf("do2Sql: parse dir[%s], err: %v", m.Tmpl.DoDir, err)
 	}
 	buf := []byte{}
-	for _, xst := range ipr.StructList {
+
+	//排序
+	keys := make([]string, 0, len(ipr.StructList))
+	for k := range ipr.StructList {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	//顺序遍历
+	for _, k := range keys {
+		xst := ipr.StructList[k]
 		b, err := m.genDao(xst)
 		if err != nil {
 			log.Panicf("gen dao err: %v", err)

@@ -19,8 +19,17 @@ func (m *Manager) DoList(xsts map[string]parser.XST) {
 		buf  = []byte{}
 		buf2 = []byte{}
 	)
-	for _, xst := range xsts {
-		b1, b2, err := m.Do(xst)
+
+	//排序
+	keys := make([]string, 0, len(xsts))
+	for k := range xsts {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	//顺序遍历
+	for _, k := range keys {
+		b1, b2, err := m.Do(xsts[k])
 		if err != nil {
 			log.Panicf("gen io err: %v \n", err)
 		}
@@ -143,8 +152,16 @@ func (m *Manager) DoTypeDef() {
 		log.Fatalf("do2Sql: parse dir[%s], err: %v", m.Tmpl.DoDir, err)
 	}
 	bufs := []byte(fmt.Sprintf(tpls.EntityTypeDefCodes, "do", conf.Global.ProjectName))
-	for _, xst := range ipr.StructList {
-		buf, err := m._typedef(xst)
+
+	//排序
+	keys := make([]string, 0, len(ipr.StructList))
+	for k := range ipr.StructList {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	//顺序遍历
+	for _, k := range keys {
+		buf, err := m._typedef(ipr.StructList[k])
 		if err != nil {
 			log.Printf("gen mapType err: %v \n", err)
 		}

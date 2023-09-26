@@ -45,8 +45,15 @@ func (m *Manager) EntityTypeDef() {
 		log.Fatalf("EntityTypeDef: parse dir[%s], err: %v", m.Tmpl.EntityDir, err)
 	}
 	bufs := []byte(fmt.Sprintf(tpls.EntityTypeDefCodes, "entity", conf.Global.ProjectName))
-	for _, xst := range ipr.StructList {
-		buf, err := m._typedef(xst)
+	//排序
+	keys := make([]string, 0, len(ipr.StructList))
+	for k := range ipr.StructList {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	//顺序遍历
+	for _, k := range keys {
+		buf, err := m._typedef(ipr.StructList[k])
 		if err != nil {
 			log.Printf("gen mapType err: %v \n", err)
 		}
@@ -160,7 +167,16 @@ func (m *Manager) GI(iParser *parser.IParser) error {
 		Pkg:  iParser.Package,
 		List: make([]tpls.DItem, 0),
 	}
-	for _, xst := range iParser.StructList {
+
+	//排序
+	keys := make([]string, 0, len(iParser.StructList))
+	for k := range iParser.StructList {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	//顺序遍历
+	for _, k := range keys {
+		xst := iParser.StructList[k]
 		if xst.GI {
 			it := tpls.DItem{
 				Name:    xst.Name,
