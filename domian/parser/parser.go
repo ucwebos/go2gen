@@ -17,7 +17,8 @@ type IParser struct {
 	Pwd          string
 	Package      string
 	INFList      map[string]INF
-	StructList   map[string]XST
+	StructList   map[string]XST    // 结构体
+	AliasList    map[string]XField // 别名
 	OtherStruct  map[string]XST
 	ConstStrList map[string]string
 	BindFuncMap  map[string]map[string]XMethod

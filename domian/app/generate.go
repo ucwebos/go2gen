@@ -40,7 +40,7 @@ func (a *App) Generate() error {
 	gm.DoList(entityPkg.Parser.StructList)
 
 	for _, entry := range a.getEntries() {
-		gm.IOEntries(entityPkg.Parser.StructList, entry)
+		gm.IOEntries(entityPkg.Parser.StructList, entityPkg.Parser.AliasList, entry)
 	}
 
 	gm.EntityTypeDef()
