@@ -27,6 +27,7 @@ func Scan(pwd string, parseType int) (ips *IParser, err error) {
 		Pwd:          pwd,
 		Package:      tool_str.LastPwdStr(pwd),
 		INFList:      make(map[string]INF, 0),
+		AliasList:    make(map[string]XField, 0),
 		StructList:   make(map[string]XST, 0),
 		OtherStruct:  make(map[string]XST, 0),
 		ConstStrList: make(map[string]string),
@@ -275,6 +276,16 @@ func (ips *IParser) ParseFile(pwd string) error {
 							}
 							inf.Methods = getInterfaceFunc(xt)
 							ips.INFList[name] = inf
+						case *ast.Ident:
+							xfd := XField{
+								Name:  name,
+								SType: STypeBasic,
+								Type:  xt.Name,
+							}
+							if xSpec.Comment != nil {
+								xfd.Comment = strings.Trim(xSpec.Comment.Text(), "\n")
+							}
+							ips.AliasList[name] = xfd
 						case *ast.StructType:
 							xst := XST{
 								GIName:     GIName,

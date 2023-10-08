@@ -13,12 +13,26 @@ import (
 	"github.com/xbitgo/core/tools/tool_file"
 )
 
-func (m *Manager) IOEntries(xsts map[string]parser.XST, entry string) {
+func (m *Manager) IOEntries(xsts map[string]parser.XST, alias map[string]parser.XField, entry string) {
 	var (
 		buf  = []byte{}
 		buf2 = []byte{}
 	)
-
+	//排序
+	aliasKeys := make([]string, 0, len(alias))
+	for k := range alias {
+		aliasKeys = append(aliasKeys, k)
+	}
+	sort.Strings(aliasKeys)
+	//顺序遍历
+	for _, k := range aliasKeys {
+		aliasField := alias[k]
+		b1, err := m.Alias(aliasField)
+		if err != nil {
+			log.Panicf("gen io err: %v \n", err)
+		}
+		buf = append(buf, b1...)
+	}
 	//排序
 	keys := make([]string, 0, len(xsts))
 	for k := range xsts {
@@ -59,6 +73,15 @@ func (m *Manager) IOEntries(xsts map[string]parser.XST, entry string) {
 	if err != nil {
 		log.Printf("io conv gen [%s] write file err: %v \n", filename, err)
 	}
+}
+
+func (m *Manager) Alias(alias parser.XField) ([]byte, error) {
+	a := tpls.Alias{
+		Name:    alias.Name,
+		Type:    alias.Type,
+		Comment: alias.Comment,
+	}
+	return a.Execute()
 }
 
 func (m *Manager) IO(xst parser.XST, tagName string) ([]byte, []byte, error) {

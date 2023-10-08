@@ -117,6 +117,7 @@ func (m *Manager) docs(entry string, modules []parser.EntryModule) error {
 		Pwd:          fmt.Sprintf("%s/%s/types", m.Tmpl.EntryDir, entry),
 		Package:      "types",
 		INFList:      make(map[string]parser.INF, 0),
+		AliasList:    make(map[string]parser.XField, 0),
 		StructList:   make(map[string]parser.XST, 0),
 		OtherStruct:  make(map[string]parser.XST, 0),
 		ConstStrList: make(map[string]string),

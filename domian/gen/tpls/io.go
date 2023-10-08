@@ -5,6 +5,29 @@ import (
 	"text/template"
 )
 
+const aliasTpl = `
+type {{.Name}} {{.Type}} // {{.Comment}}
+`
+
+type Alias struct {
+	Name    string
+	Type    string
+	Comment string
+}
+
+func (s *Alias) Execute() ([]byte, error) {
+	buf := new(bytes.Buffer)
+
+	tmpl, err := template.New(s.Name + "IO").Parse(aliasTpl)
+	if err != nil {
+		return nil, err
+	}
+	if err := tmpl.Execute(buf, s); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 const ioTpl = `
 type {{.Name}} struct{
 {{- range .Fields}}
